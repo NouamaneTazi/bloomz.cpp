@@ -7269,6 +7269,8 @@ static void ggml_compute_forward_alibi_f32(
     assert(ne1+n_past == ne0);
 
     // add alibi to src0 (KQ_scaled)
+    const int n_heads_log2_floor = 1 << (int) floor(log2(n_head));
+    
     for (int i = 0; i < ne0; i++) {
         for (int j = 0; j < ne1; j++) {
             for (int k = 0; k < ne2_ne3; k++) {
@@ -7277,14 +7279,17 @@ static void ggml_compute_forward_alibi_f32(
 
                 // TODO: k*nb2 or k*nb3
                 
-                const int n_heads_log2_floor = 1 << (int) floor(log2(ne2));
                 float m_k;
                 if (k < n_heads_log2_floor) {
                     m_k = pow(pow(2.0, -8.0 / n_heads_log2_floor), k + 1);
                 } else {
                     m_k = pow(pow(2.0, -4.0 / n_heads_log2_floor), 2 * (k - n_heads_log2_floor) + 1);
                 }
-                dst_data[0] = (j+1) * m_k;
+                if (j>i-n_past) {
+                    dst_data[0] = 0;
+                } else {
+                    dst_data[0] = (j+1) * m_k;
+                }
             }
         }
     }

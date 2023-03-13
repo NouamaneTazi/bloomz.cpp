@@ -559,6 +559,11 @@ bool llama_eval(
         const std::vector<gpt_vocab::id> & embd_inp,
               std::vector<float>         & embd_w,
               size_t                     & mem_per_token) {
+
+    // print first element in embd_inp if it is not { 0, 1, 2, 3 }
+    if (embd_inp[0] > 0) {
+        // printf("embd_inp[0] = %d", embd_inp[0]);
+    }
     const int N = embd_inp.size();
 
     const auto & hparams = model.hparams;
@@ -601,6 +606,13 @@ bool llama_eval(
 
     struct ggml_tensor * inpL = ggml_get_rows(ctx0, model.tok_embeddings, embd);
 
+    // word embeddings norm
+    {
+        inpL = ggml_norm(ctx0, inpL);
+        inpL = ggml_mul(ctx0, ggml_repeat(ctx0, model.norm, inpL), inpL);
+        inpL = ggml_add(ctx0, ggml_repeat(ctx0, model.norm_b, inpL), inpL);
+    }
+
     for (int il = 0; il < n_layer; ++il) {
         struct ggml_tensor * inpSA = inpL;
 
@@ -620,11 +632,11 @@ bool llama_eval(
         // self-attention
         {
             struct ggml_tensor * Qcur = ggml_mul_mat(ctx0, model.layers[il].wq, cur);
-            Qcur = ggml_add(ctx0, Qcur, ggml_repeat(ctx0, model.layers[il].wq_b, cur));
+            Qcur = ggml_add(ctx0, Qcur, ggml_repeat(ctx0, model.layers[il].wq_b, Qcur));
             struct ggml_tensor * Kcur = ggml_mul_mat(ctx0, model.layers[il].wk, cur);
-            Kcur = ggml_add(ctx0, Kcur, ggml_repeat(ctx0, model.layers[il].wk_b, cur));
+            Kcur = ggml_add(ctx0, Kcur, ggml_repeat(ctx0, model.layers[il].wk_b, Kcur));
             struct ggml_tensor * Vcur = ggml_mul_mat(ctx0, model.layers[il].wv, cur);
-            Vcur = ggml_add(ctx0, Vcur, ggml_repeat(ctx0, model.layers[il].wv_b, cur));
+            Vcur = ggml_add(ctx0, Vcur, ggml_repeat(ctx0, model.layers[il].wv_b, Vcur));
 
             // store key and value to memory
             if (N >= 1) {
@@ -661,7 +673,7 @@ bool llama_eval(
 
             // Alibi
             // KQ_scaled_alibi = KQ_scaled + alibi_bias
-            struct ggml_tensor * KQ_scaled_alibi = ggml_alibi(ctx0, KQ_scaled, n_past, n_head); // n_past used for mask
+            struct ggml_tensor * KQ_scaled_alibi = ggml_alibi(ctx0, KQ_scaled, n_past, n_head);
             
 
             // KQ_masked = mask_past(KQ_scaled)
@@ -736,8 +748,10 @@ bool llama_eval(
 
         // inpL = norm*inpL
         inpL = ggml_mul(ctx0,
-                    ggml_repeat(ctx0, model.norm, inpL),
+                    ggml_repeat(ctx0, model.output_norm, inpL),
                     inpL);
+        
+        inpL = ggml_add(ctx0, ggml_repeat(ctx0, model.output_norm_b, inpL), inpL);
     }
 
     // lm_head
@@ -779,8 +793,8 @@ int main(int argc, char ** argv) {
 
     gpt_params params;
     // params.model = "models/llama-7B/ggml-model.bin";
-    // params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
-    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model-f32.bin";
+    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
+    // params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model-f32.bin";
     params.prompt = "Je vais";
     params.n_predict = 4;
     params.temp = 0.0;

@@ -638,21 +638,15 @@ bool llama_eval(
             // Q = Qcur.contiguous().view(n_embd/n_head, n_head, N).permute(0, 2, 1, 3)
             struct ggml_tensor * Q =
                 ggml_permute(ctx0,
-                        ggml_rope(ctx0,
-                            ggml_cpy(ctx0,
-                                Qcur,
+                            ggml_cpy(ctx0, Qcur,
                                 ggml_new_tensor_3d(ctx0, GGML_TYPE_F32, n_embd/n_head, n_head, N)),
-                            n_past, n_rot, 0),
                         0, 2, 1, 3);
 
             // K = Kmem.view(n_embd/n_head, n_head, n_past + N).permute(0, 2, 1, 3)
             struct ggml_tensor * K =
-                ggml_permute(ctx0,
-                        ggml_rope(ctx0,
-                            ggml_reshape_3d(ctx0,
+                ggml_permute(ctx0, ggml_reshape_3d(ctx0,
                                 ggml_view_1d(ctx0, model.memory_k, (n_past + N)*n_embd, il*n_ctx*ggml_element_size(model.memory_k)*n_embd),
                                 n_embd/n_head, n_head, n_past + N),
-                            n_past, n_rot, 1),
                         0, 2, 1, 3);
 
             // K * Q

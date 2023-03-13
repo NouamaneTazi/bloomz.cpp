@@ -2072,7 +2072,7 @@ static const char * GGML_OP_LABEL[GGML_OP_COUNT] = {
     "FLASH_FF",
 };
 
-static_assert(GGML_OP_COUNT == 34, "GGML_OP_COUNT != 34");
+static_assert(GGML_OP_COUNT == 35, "GGML_OP_COUNT != 35");
 
 static const char * GGML_OP_SYMBOL[GGML_OP_COUNT] = {
     "none",
@@ -2115,7 +2115,7 @@ static const char * GGML_OP_SYMBOL[GGML_OP_COUNT] = {
     "flash_ff(x)",
 };
 
-static_assert(GGML_OP_COUNT == 34, "GGML_OP_COUNT != 34");
+static_assert(GGML_OP_COUNT == 35, "GGML_OP_COUNT != 35");
 
 //
 // ggml object
@@ -4032,6 +4032,37 @@ struct ggml_tensor * ggml_rope(
     ((int32_t *) b->data)[2] = mode;
 
     result->op   = GGML_OP_ROPE;
+    result->grad = is_node ? ggml_dup_tensor(ctx, result) : NULL;
+    result->src0 = a;
+    result->src1 = b;
+
+    return result;
+}
+
+// ggml_alibi
+
+struct ggml_tensor * ggml_alibi(
+        struct ggml_context * ctx,
+        struct ggml_tensor  * a,
+        int                   n_past,
+        int                   n_head) {
+    GGML_ASSERT(n_past >= 0);
+    bool is_node = false;
+
+    if (a->grad) {
+        GGML_ASSERT(false); // TODO: implement backward
+        is_node = true;
+    }
+
+    // TODO: when implement backward, fix this:
+    //struct ggml_tensor * result = inplace ? ggml_view_tensor(ctx, a) : ggml_dup_tensor(ctx, a);
+    struct ggml_tensor * result = ggml_view_tensor(ctx, a);
+
+    struct ggml_tensor * b = ggml_new_tensor_1d(ctx, GGML_TYPE_I32, 3);
+    ((int32_t *) b->data)[0] = n_past;
+    ((int32_t *) b->data)[1] = n_head;
+
+    result->op   = GGML_OP_ALIBI;
     result->grad = is_node ? ggml_dup_tensor(ctx, result) : NULL;
     result->src0 = a;
     result->src1 = b;
@@ -7140,8 +7171,8 @@ static void ggml_compute_forward_rope_f16(
     const int nb2 = src0->nb[2];
     const int nb3 = src0->nb[3];
 
-    //printf("ne0: %d, ne1: %d, ne2: %d, ne3: %d\n", ne0, ne1, ne2, ne3);
-    //printf("n_past = %d, ne2 = %d\n", n_past, ne2);
+    // printf("ne0: %d, ne1: %d, ne2: %d, ne3: %d\n", ne0, ne1, ne2, ne3);
+    // printf("n_past = %d, ne2 = %d\n", n_past, ne2);
 
     assert(nb0 == sizeof(ggml_fp16_t));
 
@@ -7182,6 +7213,102 @@ static void ggml_compute_forward_rope(
         case GGML_TYPE_F32:
             {
                 ggml_compute_forward_rope_f32(params, src0, src1, dst);
+            } break;
+        case GGML_TYPE_Q4_0:
+        case GGML_TYPE_Q4_1:
+        case GGML_TYPE_I8:
+        case GGML_TYPE_I16:
+        case GGML_TYPE_I32:
+        case GGML_TYPE_COUNT:
+            {
+                GGML_ASSERT(false);
+            } break;
+    }
+}
+
+
+// ggml_compute_forward_alibi
+
+static void ggml_compute_forward_alibi_f32(
+        const struct ggml_compute_params * params,
+        const struct ggml_tensor * src0,
+        const struct ggml_tensor * src1,
+        struct ggml_tensor * dst) {
+    assert(params->ith == 0);
+    assert(src1->type == GGML_TYPE_I32);
+    assert(ggml_nelements(src1) == 3);
+
+    if (params->type == GGML_TASK_INIT || params->type == GGML_TASK_FINALIZE) {
+        return;
+    }
+
+    const int n_past = ((int32_t *) src1->data)[0];
+    const int n_head = ((int32_t *) src1->data)[1];
+    const int mode   = ((int32_t *) src1->data)[2];
+
+    //const int ne0 = src0->ne[0];
+    const int ne1 = src0->ne[1];
+    const int ne2 = src0->ne[2];
+    const int ne3 = src0->ne[3];
+
+    const int nb0 = src0->nb[0];
+    const int nb1 = src0->nb[1];
+    const int nb2 = src0->nb[2];
+    const int nb3 = src0->nb[3];
+
+    printf("ne1: %d, ne2: %d, ne3: %d\n", ne1, ne2, ne3);
+    printf("n_past = %d, ne2 = %d\n", n_past, ne2);
+
+    assert(nb0 == sizeof(float));
+
+}
+
+static void ggml_compute_forward_alibi_f16(
+        const struct ggml_compute_params * params,
+        const struct ggml_tensor * src0,
+        const struct ggml_tensor * src1,
+        struct ggml_tensor * dst) {
+    assert(params->ith == 0);
+    assert(src1->type == GGML_TYPE_I32);
+    assert(ggml_nelements(src1) == 3);
+
+    if (params->type == GGML_TASK_INIT || params->type == GGML_TASK_FINALIZE) {
+        return;
+    }
+
+    const int n_past = ((int32_t *) src1->data)[0];
+    const int n_head = ((int32_t *) src1->data)[1];
+    const int mode   = ((int32_t *) src1->data)[2];
+
+    //const int ne0 = src0->ne[0];
+    const int ne1 = src0->ne[1];
+    const int ne2 = src0->ne[2];
+    const int ne3 = src0->ne[3];
+
+    const int nb0 = src0->nb[0];
+    const int nb1 = src0->nb[1];
+    const int nb2 = src0->nb[2];
+    const int nb3 = src0->nb[3];
+
+    printf("ne1: %d, ne2: %d, ne3: %d\n", ne1, ne2, ne3);
+    printf("n_past = %d, ne2 = %d\n", n_past, ne2);
+
+    assert(nb0 == sizeof(ggml_fp16_t));
+}
+
+static void ggml_compute_forward_alibi(
+        const struct ggml_compute_params * params,
+        const struct ggml_tensor * src0,
+        const struct ggml_tensor * src1,
+        struct ggml_tensor * dst) {
+    switch (src0->type) {
+        case GGML_TYPE_F16:
+            {
+                ggml_compute_forward_alibi_f16(params, src0, src1, dst);
+            } break;
+        case GGML_TYPE_F32:
+            {
+                ggml_compute_forward_alibi_f32(params, src0, src1, dst);
             } break;
         case GGML_TYPE_Q4_0:
         case GGML_TYPE_Q4_1:
@@ -8549,6 +8676,10 @@ static void ggml_compute_forward(struct ggml_compute_params * params, struct ggm
             {
                 ggml_compute_forward_rope(params, tensor->src0, tensor->src1, tensor);
             } break;
+        case GGML_OP_ALIBI:
+            {
+                ggml_compute_forward_alibi(params, tensor->src0, tensor->src1, tensor);
+            } break;
         case GGML_OP_CONV_1D_1S:
             {
                 ggml_compute_forward_conv_1d_1s(params, tensor->src0, tensor->src1, tensor);
@@ -8799,6 +8930,10 @@ static void ggml_compute_backward(struct ggml_context * ctx, struct ggml_tensor 
                 GGML_ASSERT(false); // TODO: not implemented
             } break;
         case GGML_OP_ROPE:
+            {
+                GGML_ASSERT(false); // TODO: not implemented
+            } break;
+        case GGML_OP_ALIBI:
             {
                 GGML_ASSERT(false); // TODO: not implemented
             } break;
@@ -9265,6 +9400,10 @@ void ggml_graph_compute(struct ggml_context * ctx, struct ggml_cgraph * cgraph) 
                 case GGML_OP_ROPE:
                     {
                         node->n_tasks = 1;
+                    } break;
+                case GGML_OP_ALIBI:
+                    {
+                        node->n_tasks = 1; //TODO
                     } break;
                 case GGML_OP_CONV_1D_1S:
                 case GGML_OP_CONV_1D_2S:

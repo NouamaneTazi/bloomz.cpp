@@ -615,13 +615,17 @@ bool llama_eval(
             cur = ggml_mul(ctx0,
                         ggml_repeat(ctx0, model.layers[il].attention_norm, cur),
                         cur);
+            cur = ggml_add(ctx0, ggml_repeat(ctx0, model.layers[il].attention_norm_b, cur), cur);
         }
 
         // self-attention
         {
             struct ggml_tensor * Qcur = ggml_mul_mat(ctx0, model.layers[il].wq, cur);
+            Qcur = ggml_add(ctx0, Qcur, ggml_repeat(ctx0, model.layers[il].wq_b, cur));
             struct ggml_tensor * Kcur = ggml_mul_mat(ctx0, model.layers[il].wk, cur);
+            Kcur = ggml_add(ctx0, Kcur, ggml_repeat(ctx0, model.layers[il].wk_b, cur));
             struct ggml_tensor * Vcur = ggml_mul_mat(ctx0, model.layers[il].wv, cur);
+            Vcur = ggml_add(ctx0, Vcur, ggml_repeat(ctx0, model.layers[il].wv_b, cur));
 
             // store key and value to memory
             if (N >= 1) {
@@ -687,10 +691,11 @@ bool llama_eval(
                     KQV_merged,
                     ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, n_embd, N));
 
-            // projection (no bias)
+            // projection
             cur = ggml_mul_mat(ctx0,
                     model.layers[il].wo,
                     cur);
+            cur = ggml_add(ctx0, ggml_repeat(ctx0, model.layers[il].wo_b, cur), cur);
         }
 
         struct ggml_tensor * inpFF = ggml_add(ctx0, cur, inpSA);
@@ -701,21 +706,24 @@ bool llama_eval(
             {
                 cur = ggml_norm(ctx0, inpFF);
 
-                // cur = ffn_norm*cur
+                // cur = ffn_norm*cur + ffn_norm_b
                 cur = ggml_mul(ctx0,
                         ggml_repeat(ctx0, model.layers[il].ffn_norm, cur),
                         cur);
+                cur = ggml_add(ctx0, ggml_repeat(ctx0, model.layers[il].ffn_norm_b, cur), cur);
             }
 
             cur = ggml_mul_mat(ctx0,
                     model.layers[il].w1,
                     cur);
+            cur = ggml_add(ctx0, ggml_repeat(ctx0, model.layers[il].w1_b, cur), cur);
 
             cur = ggml_gelu(ctx0, cur);
 
             cur = ggml_mul_mat(ctx0,
                     model.layers[il].w2,
                     cur);
+            cur = ggml_add(ctx0, ggml_repeat(ctx0, model.layers[il].w2_b, cur), cur);
         }
 
         cur  = ggml_add(ctx0, cur, inpFF);
@@ -774,6 +782,7 @@ int main(int argc, char ** argv) {
     gpt_params params;
     // params.model = "models/llama-7B/ggml-model.bin";
     params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
+    params.prompt = "Je vais";
 
     if (gpt_params_parse(argc, argv, params) == false) {
         return 1;

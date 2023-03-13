@@ -55,7 +55,6 @@ struct llama_layer {
     struct ggml_tensor * w1_b;
     struct ggml_tensor * w2;
     struct ggml_tensor * w2_b;
-    struct ggml_tensor * w3;
 };
 
 struct llama_model {
@@ -63,9 +62,12 @@ struct llama_model {
 
     struct ggml_tensor * tok_embeddings;
     struct ggml_tensor * norm;
+    struct ggml_tensor * norm_b;
 
     struct ggml_tensor * output_norm;
+    struct ggml_tensor * output_norm_b;
     struct ggml_tensor * output;
+    
 
     std::vector<llama_layer> layers;
 
@@ -192,28 +194,37 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
         ctx_size += n_embd*n_vocab*ggml_type_sizef(wtype); // tok_embeddings
 
         ctx_size += n_embd*ggml_type_sizef(GGML_TYPE_F32); // norm
+        ctx_size += n_embd*ggml_type_sizef(GGML_TYPE_F32); // norm_b
 
         ctx_size += n_embd*ggml_type_sizef(GGML_TYPE_F32); // output_norm
+        ctx_size += n_embd*ggml_type_sizef(GGML_TYPE_F32); // output_norm_b
 
         ctx_size += n_embd*n_vocab*ggml_type_sizef(wtype); // output
 
         ctx_size += n_layer*(n_embd*ggml_type_sizef(GGML_TYPE_F32)); // attention_norm
+        ctx_size += n_layer*(n_embd*ggml_type_sizef(GGML_TYPE_F32)); // attention_norm_b
 
         ctx_size += n_layer*(n_embd*n_embd*ggml_type_sizef(wtype)); // wq
+        ctx_size += n_layer*(n_embd*ggml_type_sizef(GGML_TYPE_F32)); // wq_b
         ctx_size += n_layer*(n_embd*n_embd*ggml_type_sizef(wtype)); // wk
+        ctx_size += n_layer*(n_embd*ggml_type_sizef(GGML_TYPE_F32)); // wk_b
         ctx_size += n_layer*(n_embd*n_embd*ggml_type_sizef(wtype)); // wv
+        ctx_size += n_layer*(n_embd*ggml_type_sizef(GGML_TYPE_F32)); // wv_b
         ctx_size += n_layer*(n_embd*n_embd*ggml_type_sizef(wtype)); // wo
+        ctx_size += n_layer*(n_embd*ggml_type_sizef(GGML_TYPE_F32)); // wo_b
 
         ctx_size += n_layer*(n_embd*ggml_type_sizef(GGML_TYPE_F32)); // ffn_norm
+        ctx_size += n_layer*(n_embd*ggml_type_sizef(GGML_TYPE_F32)); // ffn_norm_b
 
         ctx_size += n_layer*(n_ff*n_embd*ggml_type_sizef(wtype)); // w1
+        ctx_size += n_layer*(n_ff*ggml_type_sizef(GGML_TYPE_F32)); // w1_b
         ctx_size += n_layer*(n_ff*n_embd*ggml_type_sizef(wtype)); // w2
-        ctx_size += n_layer*(n_ff*n_embd*ggml_type_sizef(wtype)); // w3
+        ctx_size += n_layer*(n_ff*ggml_type_sizef(GGML_TYPE_F32)); // w2_b
 
         ctx_size += n_ctx*n_layer*n_embd*ggml_type_sizef(GGML_TYPE_F32); // memory_k
         ctx_size += n_ctx*n_layer*n_embd*ggml_type_sizef(GGML_TYPE_F32); // memory_v
 
-        ctx_size += (5 + 10*n_layer)*256; // object overhead
+        ctx_size += (5 + 10*n_layer)*256; // object overhead TODO:
 
         printf("%s: ggml ctx size = %6.2f MB\n", __func__, ctx_size/(1024.0*1024.0));
     }
@@ -245,17 +256,19 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
 
         model.tok_embeddings = ggml_new_tensor_2d(ctx, wtype, n_embd, n_vocab);
         model.norm   = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
+        model.norm_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
 
         model.output_norm = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
+        model.output_norm_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
         model.output = ggml_new_tensor_2d(ctx, wtype,         n_embd, n_vocab);
 
         // map by name
         model.tensors["tok_embeddings.weight"] = model.tok_embeddings;
         model.tensors["norm.weight"]   = model.norm;
-        model.tensors["norm.bias"]   = model.norm;
+        model.tensors["norm.bias"]   = model.norm_b;
         
         model.tensors["output_norm.weight"] = model.output_norm;
-        model.tensors["output_norm.bias"] = model.output_norm;
+        model.tensors["output_norm.bias"] = model.output_norm_b;
         model.tensors["output.weight"] = model.output;
 
         for (int i = 0; i < n_layer; ++i) {
@@ -301,7 +314,6 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
             model.tensors["layers." + std::to_string(i) + ".feed_forward.w1.bias"] = layer.w1_b;
             model.tensors["layers." + std::to_string(i) + ".feed_forward.w2.weight"] = layer.w2;
             model.tensors["layers." + std::to_string(i) + ".feed_forward.w2.bias"] = layer.w2_b;
-            // model.tensors["layers." + std::to_string(i) + ".feed_forward.w3.weight"] = layer.w3;
         }
     }
 
@@ -397,6 +409,7 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
                 //   - layers.*.attention.wv.weight
                 //   - layers.*.feed_forward.w1.weight
                 //   - layers.*.feed_forward.w3.weight
+                // TODO: bias
                 if (name.find("tok_embeddings") != std::string::npos) {
                     split_type = 0;
                 } else if (name.find("layers") != std::string::npos) {

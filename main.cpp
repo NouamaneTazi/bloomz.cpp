@@ -54,8 +54,9 @@ struct llama_model {
     llama_hparams hparams;
 
     struct ggml_tensor * tok_embeddings;
-
     struct ggml_tensor * norm;
+
+    struct ggmml_tensor * output_norm;
     struct ggml_tensor * output;
 
     std::vector<llama_layer> layers;
@@ -108,7 +109,23 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
         hparams.n_ctx = n_ctx;
 
         n_ff = ((2*(4*hparams.n_embd)/3 + hparams.n_mult - 1)/hparams.n_mult)*hparams.n_mult;
+        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
+        n_parts = 1;
+        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
+        n_parts = 1;
+        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
+        n_parts = 1;
+        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
+        n_parts = 1;
         n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
+        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
+        n_parts = 1;
+        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
+        n_parts = 1;
+        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
+        n_parts = 1;
+        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
+        n_parts = 1;
 
         printf("%s: n_vocab = %d\n", __func__, hparams.n_vocab);
         printf("%s: n_ctx   = %d\n", __func__, hparams.n_ctx);
@@ -183,6 +200,8 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
 
         ctx_size += n_embd*ggml_type_sizef(GGML_TYPE_F32); // norm
 
+        ctx_size += n_embd*ggml_type_sizef(GGML_TYPE_F32); // output_norm
+
         ctx_size += n_embd*n_vocab*ggml_type_sizef(wtype); // output
 
         ctx_size += n_layer*(n_embd*ggml_type_sizef(GGML_TYPE_F32)); // attention_norm
@@ -232,14 +251,18 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
         model.layers.resize(n_layer);
 
         model.tok_embeddings = ggml_new_tensor_2d(ctx, wtype, n_embd, n_vocab);
-
         model.norm   = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
+
+        model.output_norm = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
         model.output = ggml_new_tensor_2d(ctx, wtype,         n_embd, n_vocab);
 
         // map by name
         model.tensors["tok_embeddings.weight"] = model.tok_embeddings;
-
         model.tensors["norm.weight"]   = model.norm;
+        model.tensors["norm.bias"]   = model.norm;
+        
+        model.tensors["output_norm.weight"] = model.output_norm;
+        model.tensors["output_norm.bias"] = model.output_norm;
         model.tensors["output.weight"] = model.output;
 
         for (int i = 0; i < n_layer; ++i) {
@@ -260,17 +283,20 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
 
             // map by name
             model.tensors["layers." + std::to_string(i) + ".attention_norm.weight"] = layer.attention_norm;
+            model.tensors["layers." + std::to_string(i) + ".attention_norm.bias"] = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
 
             model.tensors["layers." + std::to_string(i) + ".attention.wq.weight"] = layer.wq;
+            // TODO: bias
             model.tensors["layers." + std::to_string(i) + ".attention.wk.weight"] = layer.wk;
             model.tensors["layers." + std::to_string(i) + ".attention.wv.weight"] = layer.wv;
             model.tensors["layers." + std::to_string(i) + ".attention.wo.weight"] = layer.wo;
 
             model.tensors["layers." + std::to_string(i) + ".ffn_norm.weight"] = layer.ffn_norm;
+            // model.tensors["layers." + std::to_string(i) + ".ffn_norm.bias"] = layer.ffn_norm;
 
             model.tensors["layers." + std::to_string(i) + ".feed_forward.w1.weight"] = layer.w1;
             model.tensors["layers." + std::to_string(i) + ".feed_forward.w2.weight"] = layer.w2;
-            model.tensors["layers." + std::to_string(i) + ".feed_forward.w3.weight"] = layer.w3;
+            // model.tensors["layers." + std::to_string(i) + ".feed_forward.w3.weight"] = layer.w3;
         }
     }
 
@@ -736,7 +762,15 @@ int main(int argc, char ** argv) {
     const int64_t t_main_start_us = ggml_time_us();
 
     gpt_params params;
+    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
+    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
+    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
+    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
     params.model = "models/llama-7B/ggml-model.bin";
+    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
+    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
+    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
+    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
 
     if (gpt_params_parse(argc, argv, params) == false) {
         return 1;

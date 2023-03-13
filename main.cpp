@@ -698,8 +698,7 @@ bool llama_eval(
                     model.layers[il].w1,
                     cur);
 
-            // SILU activation // TODO: GELU
-            cur = ggml_silu(ctx0, cur);
+            cur = ggml_gelu(ctx0, cur);
 
             cur = ggml_mul_mat(ctx0,
                     model.layers[il].w2,

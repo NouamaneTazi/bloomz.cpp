@@ -77,7 +77,7 @@ dir_tokenizer = dir_model
 
 fname_out = dir_out + "/ggml-model.bin"
 
-from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig
+from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig, BloomForCausalLM
 
 tokenizer = AutoTokenizer.from_pretrained("Muennighoff/bloom-tiny-random")
 config = AutoConfig.from_pretrained("Muennighoff/bloom-tiny-random")

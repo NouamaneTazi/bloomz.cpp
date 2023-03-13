@@ -694,19 +694,12 @@ bool llama_eval(
                         cur);
             }
 
-            struct ggml_tensor * tmp = ggml_mul_mat(ctx0,
-                    model.layers[il].w3,
-                    cur);
-
-
             cur = ggml_mul_mat(ctx0,
                     model.layers[il].w1,
                     cur);
 
-            // SILU activation
+            // SILU activation // TODO: GELU
             cur = ggml_silu(ctx0, cur);
-
-            cur = ggml_mul(ctx0, cur, tmp);
 
             cur = ggml_mul_mat(ctx0,
                     model.layers[il].w2,

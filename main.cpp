@@ -781,6 +781,8 @@ int main(int argc, char ** argv) {
     // params.model = "models/llama-7B/ggml-model.bin";
     params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
     params.prompt = "Je vais";
+    params.n_predict = 4;
+    params.temp = 0.0;
 
     if (gpt_params_parse(argc, argv, params) == false) {
         return 1;

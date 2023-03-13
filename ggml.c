@@ -7246,22 +7246,51 @@ static void ggml_compute_forward_alibi_f32(
     const int n_head = ((int32_t *) src1->data)[1];
     const int mode   = ((int32_t *) src1->data)[2];
 
-    //const int ne0 = src0->ne[0];
-    const int ne1 = src0->ne[1];
-    const int ne2 = src0->ne[2];
-    const int ne3 = src0->ne[3];
+    const int ne0 = src0->ne[0]; // all_seq_len = n_past + ne1
+    const int ne1 = src0->ne[1]; // seq_len_without_past
+    const int ne2 = src0->ne[2]; // n_head -> this is k
+    const int ne3 = src0->ne[3]; // 1 -> bsz
+
+    const int n  = ggml_nrows(src0);
+    const int ne2_ne3 = n/ne1; // ne2*ne3
 
     const int nb0 = src0->nb[0];
     const int nb1 = src0->nb[1];
     const int nb2 = src0->nb[2];
     const int nb3 = src0->nb[3];
 
-    printf("ne1: %d, ne2: %d, ne3: %d\n", ne1, ne2, ne3);
-    printf("n_past = %d, ne2 = %d\n", n_past, ne2);
+
+    // printf("ne1: %d, ne2: %d, ne3: %d\n", ne1, ne2, ne3);
+    // printf("n_past = %d, ne2 = %d\n", n_past, ne2);
+    // printf("ne0: %d, ne1: %d, ne2: %d, ne3: %d\n", ne0, ne1, ne2, ne3);
+    // printf("n_past = %d, ne2 = %d\n", n_past, ne2);
 
     assert(nb0 == sizeof(float));
+    assert(ne1+n_past == ne0);
+
+    // add alibi to src0 (KQ_scaled)
+    for (int i = 0; i < ne0; i++) {
+        for (int j = 0; j < ne1; j++) {
+            for (int k = 0; k < ne2_ne3; k++) {
+                float * const src = (float *)((char *) src0->data + i*nb0 + j*nb1 + k*nb2);
+                float * dst_data  = (float *)((char *)  dst->data + i*nb0 + j*nb1 + k*nb2);
+
+                // TODO: k*nb2 or k*nb3
+                
+                const int n_heads_log2_floor = 1 << (int) floor(log2(ne2));
+                float m_k;
+                if (k < n_heads_log2_floor) {
+                    m_k = pow(pow(2.0, -8.0 / n_heads_log2_floor), k + 1);
+                } else {
+                    m_k = pow(pow(2.0, -4.0 / n_heads_log2_floor), 2 * (k - n_heads_log2_floor) + 1);
+                }
+                dst_data[0] = (j+1) * m_k;
+            }
+        }
+    }
 
 }
+
 
 static void ggml_compute_forward_alibi_f16(
         const struct ggml_compute_params * params,
@@ -7280,7 +7309,7 @@ static void ggml_compute_forward_alibi_f16(
     const int n_head = ((int32_t *) src1->data)[1];
     const int mode   = ((int32_t *) src1->data)[2];
 
-    //const int ne0 = src0->ne[0];
+    const int ne0 = src0->ne[0];
     const int ne1 = src0->ne[1];
     const int ne2 = src0->ne[2];
     const int ne3 = src0->ne[3];
@@ -7290,8 +7319,6 @@ static void ggml_compute_forward_alibi_f16(
     const int nb2 = src0->nb[2];
     const int nb3 = src0->nb[3];
 
-    printf("ne1: %d, ne2: %d, ne3: %d\n", ne1, ne2, ne3);
-    printf("n_past = %d, ne2 = %d\n", n_past, ne2);
 
     assert(nb0 == sizeof(ggml_fp16_t));
 }

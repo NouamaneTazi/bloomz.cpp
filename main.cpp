@@ -409,7 +409,6 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
                 //   - layers.*.attention.wv.weight
                 //   - layers.*.feed_forward.w1.weight
                 //   - layers.*.feed_forward.w3.weight
-                // TODO: bias
                 if (name.find("tok_embeddings") != std::string::npos) {
                     split_type = 0;
                 } else if (name.find("layers") != std::string::npos) {

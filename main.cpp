@@ -34,19 +34,27 @@ struct llama_hparams {
 struct llama_layer {
     // normalization
     struct ggml_tensor * attention_norm;
+    struct ggml_tensor * attention_norm_b;
 
     // attention
     struct ggml_tensor * wq;
+    struct ggml_tensor * wq_b;
     struct ggml_tensor * wk;
+    struct ggml_tensor * wk_b;
     struct ggml_tensor * wv;
+    struct ggml_tensor * wv_b;
     struct ggml_tensor * wo;
+    struct ggml_tensor * wo_b;
 
     // normalization
     struct ggml_tensor * ffn_norm;
+    struct ggml_tensor * ffn_norm_b;
 
     // ff
     struct ggml_tensor * w1;
+    struct ggml_tensor * w1_b;
     struct ggml_tensor * w2;
+    struct ggml_tensor * w2_b;
     struct ggml_tensor * w3;
 };
 
@@ -108,7 +116,7 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
 
         hparams.n_ctx = n_ctx;
 
-        n_ff = ((2*(4*hparams.n_embd)/3 + hparams.n_mult - 1)/hparams.n_mult)*hparams.n_mult;
+        n_ff = ((4*hparams.n_embd + hparams.n_mult - 1)/hparams.n_mult)*hparams.n_mult;
         // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
         n_parts = 1;
 
@@ -254,33 +262,45 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
             auto & layer = model.layers[i];
 
             layer.attention_norm = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
+            layer.attention_norm_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
 
             layer.wq = ggml_new_tensor_2d(ctx, wtype, n_embd, n_embd);
+            layer.wq_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
             layer.wk = ggml_new_tensor_2d(ctx, wtype, n_embd, n_embd);
+            layer.wk_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
             layer.wv = ggml_new_tensor_2d(ctx, wtype, n_embd, n_embd);
+            layer.wv_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
             layer.wo = ggml_new_tensor_2d(ctx, wtype, n_embd, n_embd);
+            layer.wo_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
 
             layer.ffn_norm = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
+            layer.ffn_norm_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
 
             layer.w1 = ggml_new_tensor_2d(ctx, wtype, n_embd,   n_ff);
+            layer.w1_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_ff);
             layer.w2 = ggml_new_tensor_2d(ctx, wtype,   n_ff, n_embd);
-            layer.w3 = ggml_new_tensor_2d(ctx, wtype, n_embd,   n_ff);
+            layer.w2_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
 
             // map by name
             model.tensors["layers." + std::to_string(i) + ".attention_norm.weight"] = layer.attention_norm;
-            model.tensors["layers." + std::to_string(i) + ".attention_norm.bias"] = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
+            model.tensors["layers." + std::to_string(i) + ".attention_norm.bias"] = layer.attention_norm_b;
 
             model.tensors["layers." + std::to_string(i) + ".attention.wq.weight"] = layer.wq;
-            // TODO: bias
+            model.tensors["layers." + std::to_string(i) + ".attention.wq.bias"] = layer.wq_b;
             model.tensors["layers." + std::to_string(i) + ".attention.wk.weight"] = layer.wk;
+            model.tensors["layers." + std::to_string(i) + ".attention.wk.bias"] = layer.wk_b;
             model.tensors["layers." + std::to_string(i) + ".attention.wv.weight"] = layer.wv;
+            model.tensors["layers." + std::to_string(i) + ".attention.wv.bias"] = layer.wv_b;
             model.tensors["layers." + std::to_string(i) + ".attention.wo.weight"] = layer.wo;
+            model.tensors["layers." + std::to_string(i) + ".attention.wo.bias"] = layer.wo_b;
 
             model.tensors["layers." + std::to_string(i) + ".ffn_norm.weight"] = layer.ffn_norm;
-            // model.tensors["layers." + std::to_string(i) + ".ffn_norm.bias"] = layer.ffn_norm;
+            model.tensors["layers." + std::to_string(i) + ".ffn_norm.bias"] = layer.ffn_norm_b;
 
             model.tensors["layers." + std::to_string(i) + ".feed_forward.w1.weight"] = layer.w1;
+            model.tensors["layers." + std::to_string(i) + ".feed_forward.w1.bias"] = layer.w1_b;
             model.tensors["layers." + std::to_string(i) + ".feed_forward.w2.weight"] = layer.w2;
+            model.tensors["layers." + std::to_string(i) + ".feed_forward.w2.bias"] = layer.w2_b;
             // model.tensors["layers." + std::to_string(i) + ".feed_forward.w3.weight"] = layer.w3;
         }
     }

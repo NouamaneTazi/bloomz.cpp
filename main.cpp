@@ -56,7 +56,7 @@ struct llama_model {
     struct ggml_tensor * tok_embeddings;
     struct ggml_tensor * norm;
 
-    struct ggmml_tensor * output_norm;
+    struct ggml_tensor * output_norm;
     struct ggml_tensor * output;
 
     std::vector<llama_layer> layers;
@@ -109,21 +109,6 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
         hparams.n_ctx = n_ctx;
 
         n_ff = ((2*(4*hparams.n_embd)/3 + hparams.n_mult - 1)/hparams.n_mult)*hparams.n_mult;
-        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
-        n_parts = 1;
-        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
-        n_parts = 1;
-        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
-        n_parts = 1;
-        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
-        n_parts = 1;
-        n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
-        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
-        n_parts = 1;
-        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
-        n_parts = 1;
-        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
-        n_parts = 1;
         // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
         n_parts = 1;
 
@@ -762,14 +747,7 @@ int main(int argc, char ** argv) {
     const int64_t t_main_start_us = ggml_time_us();
 
     gpt_params params;
-    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
-    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
-    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
-    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
-    params.model = "models/llama-7B/ggml-model.bin";
-    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
-    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
-    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
+    // params.model = "models/llama-7B/ggml-model.bin";
     params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
 
     if (gpt_params_parse(argc, argv, params) == false) {

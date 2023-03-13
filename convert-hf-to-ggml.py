@@ -75,16 +75,18 @@ dir_out     = dir_model
 
 dir_tokenizer = dir_model
 
-fname_out = dir_out + "/ggml-model.bin"
+fname_out = dir_out + "/ggml-model-f32.bin"
 
 from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig, BloomForCausalLM
 
-tokenizer = AutoTokenizer.from_pretrained("Muennighoff/bloom-tiny-random")
-config = AutoConfig.from_pretrained("Muennighoff/bloom-tiny-random")
+# model_name = "Muennighoff/bloom-tiny-random"
+model_name = "bigscience/bloomz-560m"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+config = AutoConfig.from_pretrained(model_name)
 # https://huggingface.co/bigscience/bloomz-7b1/blob/main/config.json
-config.bias_dropout_fusion = True
-config.skip_bias_add = True
-config.skip_bias_add_qkv = False
+# config.bias_dropout_fusion = True
+# config.skip_bias_add = True
+# config.skip_bias_add_qkv = False
 hparams = config.to_dict()
 model = AutoModelForCausalLM.from_config(config)
 
@@ -94,7 +96,7 @@ model = AutoModelForCausalLM.from_config(config)
 #
 # map from ftype to string
 ftype_str = ["f32", "f16"]
-ftype = 1
+ftype = 0
 
 fout = open(fname_out, "wb")
 

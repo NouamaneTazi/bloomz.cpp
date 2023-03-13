@@ -779,10 +779,13 @@ int main(int argc, char ** argv) {
 
     gpt_params params;
     // params.model = "models/llama-7B/ggml-model.bin";
-    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
+    // params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
+    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model-f32.bin";
     params.prompt = "Je vais";
     params.n_predict = 4;
     params.temp = 0.0;
+    params.n_threads = 1;
+    params.n_batch = 1;
 
     if (gpt_params_parse(argc, argv, params) == false) {
         return 1;
@@ -881,6 +884,9 @@ int main(int argc, char ** argv) {
                 const int64_t t_start_sample_us = ggml_time_us();
 
                 id = llama_sample_top_p(vocab, logits.data() + (logits.size() - n_vocab), last_n_tokens, repeat_penalty, top_p, temp, rng);
+
+                // print
+                printf("\ngenerated token: '%s' (%d)\n", vocab.id_to_token[id].c_str(), id);
 
                 last_n_tokens.erase(last_n_tokens.begin());
                 last_n_tokens.push_back(id);

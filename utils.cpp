@@ -388,6 +388,21 @@ gpt_vocab::id llama_sample_top_p(
     std::vector<std::pair<double, gpt_vocab::id>> logits_id;
     logits_id.reserve(n_logits);
 
+    // return max token (greedy search)
+    {
+        int max_idx = 0;
+        float max_val = logits[0];
+        fprintf(stdout, "\nlogits[0]: %f", logits[0]);
+        for (int i = 1; i < n_logits; ++i) {
+            if (logits[i] > max_val) {
+                max_val = logits[i];
+                max_idx = i;
+                fprintf(stdout, "\nlogits[%d]: %f", i, logits[i]);
+            }
+        }
+        return max_idx;
+    }
+
     {
         const double scale = 1.0/temp;
         for (int i = 0; i < n_logits; ++i) {

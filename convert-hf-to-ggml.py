@@ -104,6 +104,7 @@ fout = open(fname_out, "wb")
 hparams["multiple_of"] = 1
 fout.write(struct.pack("i", 0x67676d6c)) # magic: ggml in hex
 fout.write(struct.pack("i", hparams["vocab_size"]))
+# fout.write(struct.pack("i", hparams["seq_length"]))
 fout.write(struct.pack("i", hparams["hidden_size"]))
 fout.write(struct.pack("i", hparams["multiple_of"]))
 fout.write(struct.pack("i", hparams["n_head"]))
@@ -148,7 +149,7 @@ for name in list_vars.keys():
             name = name.replace("query_key_value", n)
             print(src, ' -> ', name)
             data = data.squeeze().numpy()
-            data = data.astype(np.float16)
+            data = data.astype(np.float16) # TODO: default type is fp32
 
             n_dims = len(data.shape)
             print(name, n_dims, data.shape)

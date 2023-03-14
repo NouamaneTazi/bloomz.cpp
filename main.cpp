@@ -22,7 +22,7 @@ static const std::map<int, int> LLAMA_N_PARTS = {
 // default hparams (LLaMA 7B)
 struct llama_hparams {
     int32_t n_vocab = 32000;
-    int32_t n_ctx   = 512;   // this is provided as user input?
+    int32_t n_ctx   = 2048;   // this is provided as user input? //TODO:
     int32_t n_embd  = 4096;
     int32_t n_mult  = 256;
     int32_t n_head  = 32;
@@ -682,11 +682,11 @@ bool llama_eval(
 
             // Alibi
             // KQ_scaled_alibi = KQ_scaled + alibi_bias //TODO: optimize
-            struct ggml_tensor * KQ_scaled_alibi = ggml_alibi(ctx0, KQ_scaled, n_past, n_head);
+            // struct ggml_tensor * KQ_scaled_alibi = ggml_alibi(ctx0, KQ_scaled, n_past, n_head);
             
 
             // KQ_masked = mask_past(KQ_scaled)
-            struct ggml_tensor * KQ_masked = ggml_diag_mask_inf(ctx0, KQ_scaled_alibi, n_past);
+            struct ggml_tensor * KQ_masked = ggml_diag_mask_inf(ctx0, KQ_scaled, n_past);
 
             // KQ = soft_max(KQ_masked)
             struct ggml_tensor * KQ_soft_max = ggml_soft_max(ctx0, KQ_masked);
@@ -808,7 +808,7 @@ int main(int argc, char ** argv) {
     params.n_predict = 10;
     params.temp = 0.0;
     params.n_threads = 1;
-    params.n_batch = 1;
+    // params.n_batch = 1;
 
     if (gpt_params_parse(argc, argv, params) == false) {
         return 1;
@@ -836,8 +836,8 @@ int main(int argc, char ** argv) {
     // load the model
     {
         const int64_t t_start_us = ggml_time_us();
-
-        if (!llama_model_load(params.model, model, vocab, 512)) {  // TODO: set context from user input ??
+        const int n_ctx = 2048;
+        if (!llama_model_load(params.model, model, vocab, n_ctx)) {  // TODO: set context from user input ??
             fprintf(stderr, "%s: failed to load model from '%s'\n", __func__, params.model.c_str());
             return 1;
         }

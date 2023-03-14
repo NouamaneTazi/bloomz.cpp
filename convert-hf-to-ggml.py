@@ -88,7 +88,8 @@ config = AutoConfig.from_pretrained(model_name)
 # config.skip_bias_add = True
 # config.skip_bias_add_qkv = False
 hparams = config.to_dict()
-model = AutoModelForCausalLM.from_config(config)
+# model = AutoModelForCausalLM.from_config(config) # random weights
+model = AutoModelForCausalLM.from_pretrained(model_name, config=config)
 
 # possible data types
 #   ftype == 0 -> float32
@@ -114,9 +115,9 @@ fout.write(struct.pack("i", ftype))
 dot_token = tokenizer.encode(".")[0]
 for i in range(hparams["vocab_size"]):
     # TODO: this is probably wrong - not sure how this tokenizer works
-    text = tokenizer.decode([dot_token, i]).encode('utf-8')
+    text = tokenizer.decode([i]).encode('utf-8')
     # remove the first byte (it's always '.')
-    text = text[1:]
+    # text = text[1:]
     fout.write(struct.pack("i", len(text)))
     fout.write(text)
     

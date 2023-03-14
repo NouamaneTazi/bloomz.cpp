@@ -560,10 +560,6 @@ bool llama_eval(
               std::vector<float>         & embd_w,
               size_t                     & mem_per_token) {
 
-    // print first element in embd_inp if it is not { 0, 1, 2, 3 }
-    if (embd_inp[0] > 0) {
-        // printf("embd_inp[0] = %d", embd_inp[0]);
-    }
     const int N = embd_inp.size();
 
     const auto & hparams = model.hparams;
@@ -605,6 +601,19 @@ bool llama_eval(
     memcpy(embd->data, embd_inp.data(), N*ggml_element_size(embd));
 
     struct ggml_tensor * inpL = ggml_get_rows(ctx0, model.tok_embeddings, embd);
+
+    // print first element in embd_inp if it is not { 0, 1, 2, 3 }
+    if (embd_inp[0] > 0) {
+        fprintf(stdout, "\nembd_inp[0] = %d", embd_inp[0]);
+    }
+
+    // print first element in inpL 
+    fprintf(stdout, "\ninpL[0] = %f", *(float *)((char *) inpL->data + 0*inpL->nb[2] + 0*inpL->nb[1] + 0*inpL->nb[0]));
+    // embd
+    fprintf(stdout, "\nembd[0] = %d", *(int *)((char *) embd->data + 0*embd->nb[2] + 0*embd->nb[1] + 0*embd->nb[0]));
+
+    // print first element of model.tok_embeddings
+    // fprintf(stdout, "model.tok_embeddings[0] = %f", *(float *)((char *) model.tok_embeddings->data + 0*model.tok_embeddings->nb[2] + 0*model.tok_embeddings->nb[1] + 0*model.tok_embeddings->nb[0]));
 
     // word embeddings norm
     {
@@ -793,8 +802,8 @@ int main(int argc, char ** argv) {
 
     gpt_params params;
     // params.model = "models/llama-7B/ggml-model.bin";
-    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
-    // params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model-f32.bin";
+    // params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
+    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model-f32.bin";
     params.prompt = "Je vais";
     params.n_predict = 10;
     params.temp = 0.0;
@@ -844,7 +853,7 @@ int main(int argc, char ** argv) {
     std::vector<float> logits;
 
     // tokenize the prompt
-    std::vector<gpt_vocab::id> embd_inp = ::llama_tokenize(vocab, params.prompt, true);
+    std::vector<gpt_vocab::id> embd_inp = ::llama_tokenize(vocab, params.prompt, false); //TODO: set bos to true?
 
     params.n_predict = std::min(params.n_predict, model.hparams.n_ctx - (int) embd_inp.size());
 
@@ -873,7 +882,7 @@ int main(int argc, char ** argv) {
         if (embd.size() > 0) {
             const int64_t t_start_us = ggml_time_us();
 
-            if (!llama_eval(model, params.n_threads, n_past, embd, logits, mem_per_token)) {
+            if (!llama_eval(model, params.n_threads, n_past, embd, logits, mem_per_token)) { // update logits
                 printf("Failed to predict\n");
                 return 1;
             }

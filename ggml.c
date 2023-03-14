@@ -6877,6 +6877,13 @@ static void ggml_compute_forward_get_rows_f32(
         ggml_vec_cpy_f32(nc,
                 (float *) ((char *)  dst->data + i*dst->nb[1]),
                 (float *) ((char *) src0->data + r*src0->nb[1]));
+
+        // print (float *) ((char *) src0->data + r*src0->nb[1])
+        // fprintf(stdout, "\nembd[0] = %d", *(int *)((char *) embd->data + 0*embd->nb[2] + 0*embd->nb[1] + 0*embd->nb[0]));
+
+        fprintf(stdout, "\nsrc0: %f", *(float *)((char *) src0->data + r*src0->nb[1] + 0*src0->nb[0]));
+        // print r
+        fprintf(stdout, "\nr: %d", r);
     }
 }
 

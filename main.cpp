@@ -614,7 +614,7 @@ bool llama_eval(
     }
 
     for (int il = 0; il < n_layer; ++il) {
-        struct ggml_tensor * inpSA = inpL;
+        struct ggml_tensor * inpSA = inpL; //TODO: copy?
 
         struct ggml_tensor * cur;
 
@@ -664,7 +664,7 @@ bool llama_eval(
             // K * Q
             struct ggml_tensor * KQ = ggml_mul_mat(ctx0, K, Q);
 
-            // KQ_scaled = KQ / sqrt(n_embd/n_head) TODO: do we scale?
+            // KQ_scaled = KQ / sqrt(n_embd/n_head)
             struct ggml_tensor * KQ_scaled =
                 ggml_scale(ctx0,
                         KQ,
@@ -672,7 +672,7 @@ bool llama_eval(
                         );
 
             // Alibi
-            // KQ_scaled_alibi = KQ_scaled + alibi_bias
+            // KQ_scaled_alibi = KQ_scaled + alibi_bias //TODO: optimize
             struct ggml_tensor * KQ_scaled_alibi = ggml_alibi(ctx0, KQ_scaled, n_past, n_head);
             
 
@@ -796,7 +796,7 @@ int main(int argc, char ** argv) {
     params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
     // params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model-f32.bin";
     params.prompt = "Je vais";
-    params.n_predict = 4;
+    params.n_predict = 10;
     params.temp = 0.0;
     params.n_threads = 1;
     params.n_batch = 1;

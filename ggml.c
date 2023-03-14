@@ -7270,6 +7270,8 @@ static void ggml_compute_forward_alibi_f32(
 
     // add alibi to src0 (KQ_scaled)
     const int n_heads_log2_floor = 1 << (int) floor(log2(n_head));
+    const float m0 = pow(2.0, -8.0 / n_heads_log2_floor);
+    const float m1 = pow(2.0, -4.0 / n_heads_log2_floor);
     
     for (int i = 0; i < ne0; i++) {
         for (int j = 0; j < ne1; j++) {
@@ -7281,14 +7283,14 @@ static void ggml_compute_forward_alibi_f32(
                 
                 float m_k;
                 if (k < n_heads_log2_floor) {
-                    m_k = pow(pow(2.0, -8.0 / n_heads_log2_floor), k + 1);
+                    m_k = pow(m0, k + 1);
                 } else {
-                    m_k = pow(pow(2.0, -4.0 / n_heads_log2_floor), 2 * (k - n_heads_log2_floor) + 1);
+                    m_k = pow(m1, 2 * (k - n_heads_log2_floor) + 1);
                 }
-                if (j>i-n_past) {
-                    dst_data[0] = 0;
+                if (j<i-n_past) {
+                    dst_data[0] = 0; // going to be masked anyway
                 } else {
-                    dst_data[0] = (j+1) * m_k;
+                    dst_data[0] = (j+1) * m_k + src[0];
                 }
             }
         }
@@ -7326,6 +7328,7 @@ static void ggml_compute_forward_alibi_f16(
 
 
     assert(nb0 == sizeof(ggml_fp16_t));
+    assert(false);
 }
 
 static void ggml_compute_forward_alibi(

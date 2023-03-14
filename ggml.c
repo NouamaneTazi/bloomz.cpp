@@ -82,7 +82,7 @@ typedef void* thread_ret_t;
 
 /*#define GGML_PERF*/
 #define GGML_DEBUG 0
-#define GGML_GELU_FP16
+// #define GGML_GELU_FP16
 #define GGML_SILU_FP16
 
 #define GGML_SOFT_MAX_UNROLL 4
@@ -1892,8 +1892,8 @@ inline static void ggml_vec_sgn_f32  (const int n, float * y, const float * x) {
 inline static void ggml_vec_step_f32 (const int n, float * y, const float * x) { for (int i = 0; i < n; ++i) y[i] = (x[i] > 0.f) ? 1.f : 0.f; }
 inline static void ggml_vec_relu_f32 (const int n, float * y, const float * x) { for (int i = 0; i < n; ++i) y[i] = (x[i] > 0.f) ? x[i] : 0.f; }
 
-static const ggml_float GELU_COEF_A    = 0.044715;
-static const ggml_float SQRT_2_OVER_PI = 0.79788456080286535587989211986876;
+static const ggml_float GELU_COEF_A    = 0.044715; // 044715
+static const ggml_float SQRT_2_OVER_PI = 0.79788456; // 79788456
 
 inline static float ggml_gelu_f32(float x) {
     return 0.5*x*(1.0 + tanh(SQRT_2_OVER_PI*x*(1.0 + GELU_COEF_A*x*x)));
@@ -7267,10 +7267,8 @@ static void ggml_compute_forward_alibi_f32(
     const int nb3 = src0->nb[3];
 
 
-    // printf("ne1: %d, ne2: %d, ne3: %d\n", ne1, ne2, ne3);
-    // printf("n_past = %d, ne2 = %d\n", n_past, ne2);
-    // printf("ne0: %d, ne1: %d, ne2: %d, ne3: %d\n", ne0, ne1, ne2, ne3);
-    // printf("n_past = %d, ne2 = %d\n", n_past, ne2);
+    // printf("\nne0: %d, ne1: %d, ne2: %d, ne3: %d", ne0, ne1, ne2, ne3);
+    // printf("\nn_past = %d, ne2 = %d", n_past, ne2);
 
     assert(nb0 == sizeof(float));
     assert(ne1+n_past == ne0);
@@ -7294,11 +7292,8 @@ static void ggml_compute_forward_alibi_f32(
                 } else {
                     m_k = pow(m1, 2 * (k - n_heads_log2_floor) + 1);
                 }
-                if (j<i-n_past) {
-                    dst_data[0] = 0; // going to be masked anyway
-                } else {
-                    dst_data[0] = (j+1) * m_k + src[0];
-                }
+                //TODO: optimize
+                dst_data[0] = (j+1) * m_k + src[0];
             }
         }
     }

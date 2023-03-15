@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-struct llama_hparams {
+struct bloom_hparams {
     int32_t n_vocab = 32000;
     int32_t n_ctx   = 512;   // this is provided as user input?
     int32_t n_embd  = 4096;
@@ -21,7 +21,7 @@ struct llama_hparams {
     int32_t f16     = 1;
 };
 
-struct llama_layer {
+struct bloom_layer {
     // normalization
     struct ggml_tensor * attention_norm;
     struct ggml_tensor * attention_norm_b;
@@ -43,8 +43,8 @@ struct llama_layer {
     struct ggml_tensor * w2_b;
 };
 
-struct llama_model {
-    llama_hparams hparams;
+struct bloom_model {
+    bloom_hparams hparams;
 
     struct ggml_tensor * tok_embeddings;
     struct ggml_tensor * norm;
@@ -55,7 +55,7 @@ struct llama_model {
     struct ggml_tensor * output;
     
 
-    std::vector<llama_layer> layers;
+    std::vector<bloom_layer> layers;
 
     // key + value memory
     struct ggml_tensor * memory_k;
@@ -67,7 +67,7 @@ struct llama_model {
 };
 
 // load the model's weights from a file
-bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab & vocab, int n_ctx) {
+bool bloom_model_load(const std::string & fname, bloom_model & model, gpt_vocab & vocab, int n_ctx) {
     printf("%s: loading model from '%s' - please wait ...\n", __func__, fname.c_str());
 
     auto fin = std::ifstream(fname, std::ios::binary);
@@ -104,7 +104,7 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
         hparams.n_ctx = n_ctx;
 
         n_ff = ((4*hparams.n_embd + hparams.n_mult - 1)/hparams.n_mult)*hparams.n_mult;
-        // n_parts = LLAMA_N_PARTS.at(hparams.n_embd);
+        // n_parts = BLOOM_N_PARTS.at(hparams.n_embd);
         n_parts = 1;
 
         printf("%s: n_vocab = %d\n", __func__, hparams.n_vocab);
@@ -524,8 +524,8 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
 //
 // The GPT-J model requires about 16MB of memory per input token.
 //
-bool llama_eval(
-        const llama_model & model,
+bool bloom_eval(
+        const bloom_model & model,
         const int n_threads,
         const int n_past,
         const std::vector<gpt_vocab::id> & embd_inp,
@@ -790,13 +790,13 @@ int main(int argc, char ** argv) {
     int64_t t_load_us = 0;
 
     gpt_vocab vocab;
-    llama_model model;
+    bloom_model model;
 
     // load the model
     {
         const int64_t t_start_us = ggml_time_us();
         const int n_ctx = 512;
-        if (!llama_model_load(params.model, model, vocab, n_ctx)) {  // TODO: set context from user input ??
+        if (!bloom_model_load(params.model, model, vocab, n_ctx)) {  // TODO: set context from user input ??
             fprintf(stderr, "%s: failed to load model from '%s'\n", __func__, params.model.c_str());
             return 1;
         }
@@ -812,7 +812,7 @@ int main(int argc, char ** argv) {
     std::vector<float> logits;
 
     // tokenize the prompt
-    std::vector<gpt_vocab::id> embd_inp = ::llama_tokenize(vocab, params.prompt, false); //TODO: set bos to true?
+    std::vector<gpt_vocab::id> embd_inp = ::bloom_tokenize(vocab, params.prompt, false); //TODO: set bos to true?
 
     params.n_predict = std::min(params.n_predict, model.hparams.n_ctx - (int) embd_inp.size());
 
@@ -830,7 +830,7 @@ int main(int argc, char ** argv) {
 
     // determine the required inference memory per token:
     size_t mem_per_token = 0;
-    llama_eval(model, params.n_threads, 0, { 0, 1, 2, 3 }, logits, mem_per_token);
+    bloom_eval(model, params.n_threads, 0, { 0, 1, 2, 3 }, logits, mem_per_token);
 
     int last_n_size = params.repeat_last_n;
     std::vector<gpt_vocab::id> last_n_tokens(last_n_size);
@@ -841,7 +841,7 @@ int main(int argc, char ** argv) {
         if (embd.size() > 0) {
             const int64_t t_start_us = ggml_time_us();
 
-            if (!llama_eval(model, params.n_threads, n_past, embd, logits, mem_per_token)) { // update logits
+            if (!bloom_eval(model, params.n_threads, n_past, embd, logits, mem_per_token)) { // update logits
                 printf("Failed to predict\n");
                 return 1;
             }
@@ -865,7 +865,7 @@ int main(int argc, char ** argv) {
             {
                 const int64_t t_start_sample_us = ggml_time_us();
 
-                id = llama_sample_top_p(vocab, logits.data() + (logits.size() - n_vocab), last_n_tokens, repeat_penalty, top_p, temp, rng);
+                id = bloom_sample_top_p(vocab, logits.data() + (logits.size() - n_vocab), last_n_tokens, repeat_penalty, top_p, temp, rng);
 
                 // // print
                 // printf("\ngenerated token: '%s' (%d)\n", vocab.id_to_token[id].c_str(), id);

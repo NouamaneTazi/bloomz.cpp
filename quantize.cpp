@@ -15,8 +15,8 @@
 // TODO: move somewhere else
 #define QK 32
 
-// default hparams (LLaMA76B)
-struct llama_hparams {
+// default hparams (Bloom76B)
+struct bloom_hparams {
     int32_t n_vocab = 32000;
     int32_t n_ctx   = 512;   // this is provided as user input?
     int32_t n_embd  = 4096;
@@ -28,7 +28,7 @@ struct llama_hparams {
 
 
 // quantize a model
-bool llama_model_quantize(const std::string & fname_inp, const std::string & fname_out, int itype) {
+bool bloom_model_quantize(const std::string & fname_inp, const std::string & fname_out, int itype) {
     ggml_type type = GGML_TYPE_Q4_1;
 
     switch (itype) {
@@ -70,7 +70,7 @@ bool llama_model_quantize(const std::string & fname_inp, const std::string & fna
         fout.write((char *) &magic, sizeof(magic));
     }
 
-    llama_hparams hparams;
+    bloom_hparams hparams;
 
     // load hparams
     {
@@ -313,7 +313,7 @@ int main(int argc, char ** argv) {
     {
         const int64_t t_start_us = ggml_time_us();
 
-        if (!llama_model_quantize(fname_inp, fname_out, itype)) {
+        if (!bloom_model_quantize(fname_inp, fname_out, itype)) {
             fprintf(stderr, "%s: failed to quantize model from '%s'\n", __func__, fname_inp.c_str());
             return 1;
         }

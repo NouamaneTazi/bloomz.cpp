@@ -238,7 +238,7 @@ std::vector<gpt_vocab::id> gpt_tokenize(const gpt_vocab & vocab, const std::stri
     return tokens;
 }
 
-std::vector<gpt_vocab::id> llama_tokenize(const gpt_vocab & vocab, const std::string & text, bool bos) {
+std::vector<gpt_vocab::id> bloom_tokenize(const gpt_vocab & vocab, const std::string & text, bool bos) {
     //auto res = gpt_tokenize(vocab, text);
 
     //if (bos) {
@@ -375,7 +375,7 @@ gpt_vocab::id gpt_sample_top_k_top_p(
     return logits_id[idx].second;
 }
 
-gpt_vocab::id llama_sample_top_p(
+gpt_vocab::id bloom_sample_top_p(
         const gpt_vocab & vocab,
         const float * logits,
         std::vector<gpt_vocab::id> & last_n_tokens,
@@ -407,7 +407,7 @@ gpt_vocab::id llama_sample_top_p(
         const double scale = 1.0/temp;
         for (int i = 0; i < n_logits; ++i) {
             // repetition penalty from CTRL paper (https://arxiv.org/abs/1909.05858)
-            // credit https://github.com/facebookresearch/llama/compare/main...shawwn:llama:main
+            // credit https://github.com/facebookresearch/bloom/compare/main...shawwn:bloom:main
             if (std::find(last_n_tokens.begin(), last_n_tokens.end(), i) != last_n_tokens.end()) {
                 // if score < 0 then repetition penalty has to multiplied to reduce the previous token probability
                 if (logits[i] < 0.0) {

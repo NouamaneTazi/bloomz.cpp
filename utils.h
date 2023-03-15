@@ -67,7 +67,7 @@ std::vector<gpt_vocab::id> gpt_tokenize(const gpt_vocab & vocab, const std::stri
 
 // TODO: this is probably wrong, but I cannot figure out how this tokenizer works ..
 // ref: https://github.com/google/sentencepiece
-std::vector<gpt_vocab::id> llama_tokenize(const gpt_vocab & vocab, const std::string & text, bool bos);
+std::vector<gpt_vocab::id> bloom_tokenize(const gpt_vocab & vocab, const std::string & text, bool bos);
 
 // load the tokens from encoder.json
 bool gpt_vocab_init(const std::string & fname, gpt_vocab & vocab);
@@ -88,7 +88,7 @@ gpt_vocab::id gpt_sample_top_k_top_p(
         double temp,
         std::mt19937 & rng);
 
-gpt_vocab::id llama_sample_top_p(
+gpt_vocab::id bloom_sample_top_p(
         const gpt_vocab & vocab,
         const float * logits,
         std::vector<gpt_vocab::id> & last_n_tokens,

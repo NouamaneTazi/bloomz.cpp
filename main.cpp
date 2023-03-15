@@ -11,18 +11,9 @@
 #include <string>
 #include <vector>
 
-// determine number of model parts based on the dimension
-static const std::map<int, int> LLAMA_N_PARTS = {
-    { 4096, 1 },
-    { 5120, 2 },
-    { 6656, 4 },
-    { 8192, 8 },
-};
-
-// default hparams (LLaMA 7B)
 struct llama_hparams {
     int32_t n_vocab = 32000;
-    int32_t n_ctx   = 2048;   // this is provided as user input? //TODO:
+    int32_t n_ctx   = 512;   // this is provided as user input?
     int32_t n_embd  = 4096;
     int32_t n_mult  = 256;
     int32_t n_head  = 32;
@@ -806,7 +797,7 @@ int main(int argc, char ** argv) {
     // load the model
     {
         const int64_t t_start_us = ggml_time_us();
-        const int n_ctx = 2048;
+        const int n_ctx = 512;
         if (!llama_model_load(params.model, model, vocab, n_ctx)) {  // TODO: set context from user input ??
             fprintf(stderr, "%s: failed to load model from '%s'\n", __func__, params.model.c_str());
             return 1;

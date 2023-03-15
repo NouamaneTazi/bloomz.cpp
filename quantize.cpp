@@ -283,7 +283,7 @@ bool llama_model_quantize(const std::string & fname_inp, const std::string & fna
 }
 
 // usage:
-//  ./llama-quantize models/llama/ggml-model.bin models/llama/ggml-model-quant.bin type
+// ./quantize models/ggml-model-bloomz-7b1-f16.bin models/ggml-model-bloomz-7b1-f16-quant.bin 2
 //
 int main(int argc, char ** argv) {
     if (argc != 4) {

@@ -766,9 +766,7 @@ int main(int argc, char ** argv) {
     const int64_t t_main_start_us = ggml_time_us();
 
     gpt_params params;
-    // params.model = "models/llama-7B/ggml-model.bin";
-    // params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model.bin";
-    params.model = "/Users/nouamanetazi/projects/bloomz.cpp/models/ggml-model-f32.bin";
+    params.model = "models/ggml-model-bloomz-7b1-f16-q4_0.bin";
     params.prompt = "Je vais";
 
     if (gpt_params_parse(argc, argv, params) == false) {

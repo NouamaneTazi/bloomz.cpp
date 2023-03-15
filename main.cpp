@@ -37,12 +37,8 @@ struct llama_layer {
     struct ggml_tensor * attention_norm_b;
 
     // attention
-    struct ggml_tensor * wq;
-    struct ggml_tensor * wq_b;
-    struct ggml_tensor * wk;
-    struct ggml_tensor * wk_b;
-    struct ggml_tensor * wv;
-    struct ggml_tensor * wv_b;
+    struct ggml_tensor * query_key_value;
+    struct ggml_tensor * query_key_value_b;
     struct ggml_tensor * wo;
     struct ggml_tensor * wo_b;
 
@@ -204,12 +200,8 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
         ctx_size += n_layer*(n_embd*ggml_type_sizef(GGML_TYPE_F32)); // attention_norm
         ctx_size += n_layer*(n_embd*ggml_type_sizef(GGML_TYPE_F32)); // attention_norm_b
 
-        ctx_size += n_layer*(n_embd*n_embd*ggml_type_sizef(wtype)); // wq
-        ctx_size += n_layer*(n_embd*ggml_type_sizef(GGML_TYPE_F32)); // wq_b
-        ctx_size += n_layer*(n_embd*n_embd*ggml_type_sizef(wtype)); // wk
-        ctx_size += n_layer*(n_embd*ggml_type_sizef(GGML_TYPE_F32)); // wk_b
-        ctx_size += n_layer*(n_embd*n_embd*ggml_type_sizef(wtype)); // wv
-        ctx_size += n_layer*(n_embd*ggml_type_sizef(GGML_TYPE_F32)); // wv_b
+        ctx_size += n_layer*(3*n_embd*n_embd*ggml_type_sizef(wtype)); // query_key_value
+        ctx_size += n_layer*(3*n_embd*ggml_type_sizef(GGML_TYPE_F32)); // query_key_value_b
         ctx_size += n_layer*(n_embd*n_embd*ggml_type_sizef(wtype)); // wo
         ctx_size += n_layer*(n_embd*ggml_type_sizef(GGML_TYPE_F32)); // wo_b
 
@@ -277,12 +269,8 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
             layer.attention_norm = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
             layer.attention_norm_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
 
-            layer.wq = ggml_new_tensor_2d(ctx, wtype, n_embd, n_embd);
-            layer.wq_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
-            layer.wk = ggml_new_tensor_2d(ctx, wtype, n_embd, n_embd);
-            layer.wk_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
-            layer.wv = ggml_new_tensor_2d(ctx, wtype, n_embd, n_embd);
-            layer.wv_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
+            layer.query_key_value = ggml_new_tensor_2d(ctx, wtype, n_embd, 3*n_embd);
+            layer.query_key_value_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, 3*n_embd);
             layer.wo = ggml_new_tensor_2d(ctx, wtype, n_embd, n_embd);
             layer.wo_b = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
 
@@ -298,12 +286,8 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
             model.tensors["layers." + std::to_string(i) + ".attention_norm.weight"] = layer.attention_norm;
             model.tensors["layers." + std::to_string(i) + ".attention_norm.bias"] = layer.attention_norm_b;
 
-            model.tensors["layers." + std::to_string(i) + ".attention.wq.weight"] = layer.wq;
-            model.tensors["layers." + std::to_string(i) + ".attention.wq.bias"] = layer.wq_b;
-            model.tensors["layers." + std::to_string(i) + ".attention.wk.weight"] = layer.wk;
-            model.tensors["layers." + std::to_string(i) + ".attention.wk.bias"] = layer.wk_b;
-            model.tensors["layers." + std::to_string(i) + ".attention.wv.weight"] = layer.wv;
-            model.tensors["layers." + std::to_string(i) + ".attention.wv.bias"] = layer.wv_b;
+            model.tensors["layers." + std::to_string(i) + ".attention.query_key_value.weight"] = layer.query_key_value;
+            model.tensors["layers." + std::to_string(i) + ".attention.query_key_value.bias"] = layer.query_key_value_b;
             model.tensors["layers." + std::to_string(i) + ".attention.wo.weight"] = layer.wo;
             model.tensors["layers." + std::to_string(i) + ".attention.wo.bias"] = layer.wo_b;
 
@@ -602,19 +586,6 @@ bool llama_eval(
 
     struct ggml_tensor * inpL = ggml_get_rows(ctx0, model.tok_embeddings, embd);
 
-    // print first element in embd_inp if it is not { 0, 1, 2, 3 }
-    if (embd_inp[0] > 0) {
-        fprintf(stdout, "\nembd_inp[0] = %d", embd_inp[0]);
-    }
-
-    // print first element in inpL 
-    fprintf(stdout, "\ninpL[0] = %f", *(float *)((char *) inpL->data + 0*inpL->nb[2] + 0*inpL->nb[1] + 0*inpL->nb[0]));
-    // embd
-    fprintf(stdout, "\nembd[0] = %d", *(int *)((char *) embd->data + 0*embd->nb[2] + 0*embd->nb[1] + 0*embd->nb[0]));
-
-    // print first element of model.tok_embeddings
-    // fprintf(stdout, "model.tok_embeddings[0] = %f", *(float *)((char *) model.tok_embeddings->data + 0*model.tok_embeddings->nb[2] + 0*model.tok_embeddings->nb[1] + 0*model.tok_embeddings->nb[0]));
-
     // word embeddings norm
     {
         inpL = ggml_norm(ctx0, inpL);
@@ -638,14 +609,22 @@ bool llama_eval(
             cur = ggml_add(ctx0, ggml_repeat(ctx0, model.layers[il].attention_norm_b, cur), cur);
         }
 
+        // attn
+        {
+            cur = ggml_mul_mat(ctx0,model.layers[il].query_key_value, cur);
+
+            cur = ggml_add(ctx0,
+                    ggml_repeat(ctx0, model.layers[il].query_key_value_b, cur),
+                    cur);
+        }
+
+        // cur = ggml_debug(ctx0, cur);
+
         // self-attention
         {
-            struct ggml_tensor * Qcur = ggml_mul_mat(ctx0, model.layers[il].wq, cur);
-            Qcur = ggml_add(ctx0, Qcur, ggml_repeat(ctx0, model.layers[il].wq_b, Qcur));
-            struct ggml_tensor * Kcur = ggml_mul_mat(ctx0, model.layers[il].wk, cur);
-            Kcur = ggml_add(ctx0, Kcur, ggml_repeat(ctx0, model.layers[il].wk_b, Kcur));
-            struct ggml_tensor * Vcur = ggml_mul_mat(ctx0, model.layers[il].wv, cur);
-            Vcur = ggml_add(ctx0, Vcur, ggml_repeat(ctx0, model.layers[il].wv_b, Vcur));
+            struct ggml_tensor * Qcur = ggml_view_2d(ctx0, cur, n_embd, N, cur->nb[1], 0*sizeof(float)*n_embd);
+            struct ggml_tensor * Kcur = ggml_view_2d(ctx0, cur, n_embd, N, cur->nb[1], 1*sizeof(float)*n_embd); //TODO: float or fp16?
+            struct ggml_tensor * Vcur = ggml_view_2d(ctx0, cur, n_embd, N, cur->nb[1], 2*sizeof(float)*n_embd);
 
             // store key and value to memory
             if (N >= 1) {

@@ -64,6 +64,9 @@ if len(sys.argv) < 3:
 model_name = sys.argv[1]
 dir_out = sys.argv[2]
 
+# make sure the output directory exists
+os.makedirs(dir_out, exist_ok=True)
+
 # possible data types
 #   ftype == 0 -> float32
 #   ftype == 1 -> float16

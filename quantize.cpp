@@ -23,7 +23,6 @@ struct llama_hparams {
     int32_t n_mult  = 256;
     int32_t n_head  = 32;
     int32_t n_layer = 32;
-    int32_t n_rot   = 64;
     int32_t f16     = 1;
 };
 
@@ -81,7 +80,6 @@ bool llama_model_quantize(const std::string & fname_inp, const std::string & fna
         finp.read((char *) &hparams.n_mult,  sizeof(hparams.n_mult));
         finp.read((char *) &hparams.n_head,  sizeof(hparams.n_head));
         finp.read((char *) &hparams.n_layer, sizeof(hparams.n_layer));
-        finp.read((char *) &hparams.n_rot,   sizeof(hparams.n_rot));
         finp.read((char *) &hparams.f16,     sizeof(hparams.f16));
 
         printf("%s: n_vocab = %d\n", __func__, hparams.n_vocab);
@@ -98,7 +96,6 @@ bool llama_model_quantize(const std::string & fname_inp, const std::string & fna
         fout.write((char *) &hparams.n_mult,  sizeof(hparams.n_mult));
         fout.write((char *) &hparams.n_head,  sizeof(hparams.n_head));
         fout.write((char *) &hparams.n_layer, sizeof(hparams.n_layer));
-        fout.write((char *) &hparams.n_rot,   sizeof(hparams.n_rot));
         fout.write((char *) &itype,           sizeof(hparams.f16));
     }
 

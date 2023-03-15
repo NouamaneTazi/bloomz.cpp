@@ -27,7 +27,6 @@ struct llama_hparams {
     int32_t n_mult  = 256;
     int32_t n_head  = 32;
     int32_t n_layer = 32;
-    int32_t n_rot   = 64;
     int32_t f16     = 1;
 };
 
@@ -109,7 +108,6 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
         fin.read((char *) &hparams.n_mult,  sizeof(hparams.n_mult));
         fin.read((char *) &hparams.n_head,  sizeof(hparams.n_head));
         fin.read((char *) &hparams.n_layer, sizeof(hparams.n_layer));
-        fin.read((char *) &hparams.n_rot,   sizeof(hparams.n_rot));
         fin.read((char *) &hparams.f16,     sizeof(hparams.f16));
 
         hparams.n_ctx = n_ctx;
@@ -124,7 +122,6 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
         printf("%s: n_mult  = %d\n", __func__, hparams.n_mult);
         printf("%s: n_head  = %d\n", __func__, hparams.n_head);
         printf("%s: n_layer = %d\n", __func__, hparams.n_layer);
-        printf("%s: n_rot   = %d\n", __func__, hparams.n_rot);
         printf("%s: f16     = %d\n", __func__, hparams.f16);
         printf("%s: n_ff    = %d\n", __func__, n_ff);
         printf("%s: n_parts = %d\n", __func__, n_parts);
@@ -553,7 +550,6 @@ bool llama_eval(
     const int n_ctx   = hparams.n_ctx;
     const int n_head  = hparams.n_head;
     const int n_vocab = hparams.n_vocab;
-    const int n_rot   = hparams.n_embd/hparams.n_head;
 
     const int d_key = n_embd/n_head;
 

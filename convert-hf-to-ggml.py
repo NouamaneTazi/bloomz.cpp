@@ -79,8 +79,9 @@ dir_tokenizer = dir_model
 from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig, BloomForCausalLM
 
 # model_name = "Muennighoff/bloom-tiny-random"
-model_name = "bigscience/bloomz-560m"
+# model_name = "bigscience/bloomz-560m"
 # model_name = "bigscience/bloomz-3b"
+model_name = "bigscience/bloomz-7b1"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 config = AutoConfig.from_pretrained(model_name)
 # https://huggingface.co/bigscience/bloomz-7b1/blob/main/config.json
@@ -97,7 +98,7 @@ model = AutoModelForCausalLM.from_pretrained(model_name, config=config)
 #
 # map from ftype to string
 ftype_str = ["f32", "f16"]
-ftype = 0
+ftype = 1
 
 fname_out = dir_out + f"/ggml-model-{model_name.split('/')[-1]}-{ftype_str[ftype]}.bin"
 fout = open(fname_out, "wb")
@@ -110,7 +111,6 @@ fout.write(struct.pack("i", hparams["hidden_size"]))
 fout.write(struct.pack("i", hparams["multiple_of"]))
 fout.write(struct.pack("i", hparams["n_head"]))
 fout.write(struct.pack("i", hparams["n_layer"]))
-fout.write(struct.pack("i", hparams["hidden_size"] // hparams["n_head"])) # rot (obsolete)
 fout.write(struct.pack("i", ftype))
 
 # Is this correct??

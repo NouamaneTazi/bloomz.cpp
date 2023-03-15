@@ -75,12 +75,12 @@ dir_out     = dir_model
 
 dir_tokenizer = dir_model
 
-fname_out = dir_out + "/ggml-model-f32.bin"
 
 from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig, BloomForCausalLM
 
 # model_name = "Muennighoff/bloom-tiny-random"
 model_name = "bigscience/bloomz-560m"
+# model_name = "bigscience/bloomz-3b"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 config = AutoConfig.from_pretrained(model_name)
 # https://huggingface.co/bigscience/bloomz-7b1/blob/main/config.json
@@ -99,6 +99,7 @@ model = AutoModelForCausalLM.from_pretrained(model_name, config=config)
 ftype_str = ["f32", "f16"]
 ftype = 0
 
+fname_out = dir_out + f"/ggml-model-{model_name.split('/')[-1]}-{ftype_str[ftype]}.bin"
 fout = open(fname_out, "wb")
 
 hparams["multiple_of"] = 1
@@ -142,49 +143,52 @@ for name in list_vars.keys():
     
 
     if "query_key_value" in src:
-        q, k, v = list_vars[src].split(list_vars[src].shape[0] // 3, dim=0)
-        old_name = name
-        for data, n in zip([q, k, v], ["wq", "wk", "wv"]):
-            name = old_name
-            name = name.replace("query_key_value", n)
-            print(src, ' -> ', name)
-            data = data.squeeze().numpy()
-            data = data.astype(np.float16) # TODO: default type is fp32
+        qkv = list_vars[src]
+        # q, k, v = list_vars[src].split(list_vars[src].shape[0] // 3, dim=0)
+        q, k, v = list_vars[src].reshape(config.n_head, 3, -1).unbind(1)
+        list_vars[src] = torch.cat([q, k, v], dim=0).reshape_as(qkv)
+        # old_name = name
+        # for data, n in zip([q, k, v], ["wq", "wk", "wv"]):
+        #     name = old_name
+        #     name = name.replace("query_key_value", n)
+        #     print(src, ' -> ', name)
+        #     data = data.squeeze().numpy()
+        #     data = data.astype(np.float32) # TODO: default type is fp32
 
-            n_dims = len(data.shape)
-            print(name, n_dims, data.shape)
+        #     n_dims = len(data.shape)
+        #     print(name, n_dims, data.shape)
 
-            # default type is fp16
-            ftype_cur = 1
-            if ftype == 0 or n_dims == 1:
-                print("  Converting to float32")
-                data = data.astype(np.float32)
-                ftype_cur = 0
+        #     # default type is fp32
+        #     ftype_cur = 0
+        #     if ftype == 1 and n_dims > 1:
+        #         print("  Converting to float16")
+        #         data = data.astype(np.float16)
+        #         ftype_cur = 1
 
-            # header
-            str = name.encode('utf-8')
-            fout.write(struct.pack("iii", n_dims, len(str), ftype_cur))
-            for i in range(n_dims):
-                fout.write(struct.pack("i", data.shape[n_dims - 1 - i]))
-            fout.write(str);
+        #     # header
+        #     str = name.encode('utf-8')
+        #     fout.write(struct.pack("iii", n_dims, len(str), ftype_cur))
+        #     for i in range(n_dims):
+        #         fout.write(struct.pack("i", data.shape[n_dims - 1 - i]))
+        #     fout.write(str);
 
-            # data
-            data.tofile(fout)
-        continue
+        #     # data
+        #     data.tofile(fout)
+        # continue
 
     print(src, ' -> ', name)
     data = list_vars[src].squeeze().numpy()
-    data = data.astype(np.float16)
+    data = data.astype(np.float32)
 
     n_dims = len(data.shape)
     print(name, n_dims, data.shape)
 
-    # default type is fp16
-    ftype_cur = 1
-    if ftype == 0 or n_dims == 1:
-        print("  Converting to float32")
-        data = data.astype(np.float32)
-        ftype_cur = 0
+    # default type is fp32
+    ftype_cur = 0
+    if ftype == 1 and n_dims > 1:
+        print("  Converting to float16")
+        data = data.astype(np.float16)
+        ftype_cur = 1
 
     # header
     str = name.encode('utf-8')

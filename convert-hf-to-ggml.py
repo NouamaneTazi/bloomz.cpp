@@ -2,7 +2,7 @@
 #
 # Usage:
 #
-#   python3 ./whisper.cpp/models/convert-h5-to-ggml.py ./whisper-medium/ ./whisper .
+#   python3 models/convert-h5-to-ggml.py 
 #
 # This script is similar to "convert-pt-to-ggml.py"
 #
@@ -54,11 +54,15 @@ def bytes_to_unicode():
     cs = [chr(n) for n in cs]
     return dict(zip(bs, cs))
 
-if len(sys.argv) < 4:
-    print("Usage: convert-hf-to-ggml.py dir_model dir-output [use-f32]\n")
+if len(sys.argv) < 3:
+    print("Usage: python convert-hf-to-ggml.py model_name dir-output [use-f32]")
+    print("  model_name: name of the model to convert. Example: 'bigscience/bloomz-560m'")
+    print("  dir-output: directory where the output file will be written")
+    print("  use-f32:    if present, use float32 instead of float16")
     sys.exit(1)
 
-dir_out     = "/Users/nouamanetazi/projects/bloomz.cpp/models/"
+model_name = sys.argv[1]
+dir_out = sys.argv[2]
 
 # possible data types
 #   ftype == 0 -> float32
@@ -67,14 +71,13 @@ dir_out     = "/Users/nouamanetazi/projects/bloomz.cpp/models/"
 # map from ftype to string
 ftype_str = ["f32", "f16"]
 ftype = 1
+if len(sys.argv) > 3:
+    ftype = 0
 
-# model_name = "Muennighoff/bloom-tiny-random"
-# model_name = "bigscience/bloomz-560m"
-# model_name = "bigscience/bloomz-3b"
-model_name = "bigscience/bloomz-7b1"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 config = AutoConfig.from_pretrained(model_name)
 hparams = config.to_dict()
+print("Loading model: ", model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, config=config, torch_dtype=torch.float16 if ftype == 1 else torch.float32)
 print("Model loaded: ", model_name)
 

@@ -1,18 +1,10 @@
-# Convert Hugging Face fine-tuned models to ggml format
+# Convert Hugging Face fine-tuned bloom-like models to ggml format
 #
 # Usage:
-#
-#   git clone https://github.com/openai/whisper
-#   git clone https://github.com/ggerganov/whisper.cpp
-#   git clone https://huggingface.co/openai/whisper-medium
 #
 #   python3 ./whisper.cpp/models/convert-h5-to-ggml.py ./whisper-medium/ ./whisper .
 #
 # This script is similar to "convert-pt-to-ggml.py"
-#
-# For more info:
-#
-#   https://github.com/ggerganov/whisper.cpp/issues/157
 #
 
 import io
@@ -25,6 +17,7 @@ import torch
 import numpy as np
 
 from transformers import BloomModel
+from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig, BloomForCausalLM
 
 conv_map = {
     'word_embeddings'       : 'tok_embeddings',
@@ -61,36 +54,11 @@ def bytes_to_unicode():
     cs = [chr(n) for n in cs]
     return dict(zip(bs, cs))
 
-# if len(sys.argv) < 4:
-#     print("Usage: convert-h5-to-ggml.py dir_model path-to-whisper-repo dir-output [use-f32]\n")
-#     sys.exit(1)
+if len(sys.argv) < 4:
+    print("Usage: convert-hf-to-ggml.py dir_model dir-output [use-f32]\n")
+    sys.exit(1)
 
-dir_model   = "/Users/nouamanetazi/projects/bloomz.cpp/models/"
-dir_whisper = dir_model
-dir_out     = dir_model
-
-# model = BloomModel.from_pretrained(dir_model)
-
-#code.interact(local=locals())
-
-dir_tokenizer = dir_model
-
-
-from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig, BloomForCausalLM
-
-# model_name = "Muennighoff/bloom-tiny-random"
-# model_name = "bigscience/bloomz-560m"
-# model_name = "bigscience/bloomz-3b"
-model_name = "bigscience/bloomz-7b1"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-config = AutoConfig.from_pretrained(model_name)
-# https://huggingface.co/bigscience/bloomz-7b1/blob/main/config.json
-# config.bias_dropout_fusion = True
-# config.skip_bias_add = True
-# config.skip_bias_add_qkv = False
-hparams = config.to_dict()
-# model = AutoModelForCausalLM.from_config(config) # random weights
-model = AutoModelForCausalLM.from_pretrained(model_name, config=config)
+dir_out     = "/Users/nouamanetazi/projects/bloomz.cpp/models/"
 
 # possible data types
 #   ftype == 0 -> float32
@@ -99,6 +67,17 @@ model = AutoModelForCausalLM.from_pretrained(model_name, config=config)
 # map from ftype to string
 ftype_str = ["f32", "f16"]
 ftype = 1
+
+# model_name = "Muennighoff/bloom-tiny-random"
+# model_name = "bigscience/bloomz-560m"
+# model_name = "bigscience/bloomz-3b"
+model_name = "bigscience/bloomz-7b1"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+config = AutoConfig.from_pretrained(model_name)
+hparams = config.to_dict()
+model = AutoModelForCausalLM.from_pretrained(model_name, config=config, torch_dtype=torch.float16 if ftype == 1 else torch.float32)
+print("Model loaded: ", model_name)
+
 
 fname_out = dir_out + f"/ggml-model-{model_name.split('/')[-1]}-{ftype_str[ftype]}.bin"
 fout = open(fname_out, "wb")
@@ -116,10 +95,7 @@ fout.write(struct.pack("i", ftype))
 # Is this correct??
 dot_token = tokenizer.encode(".")[0]
 for i in range(hparams["vocab_size"]):
-    # TODO: this is probably wrong - not sure how this tokenizer works
     text = tokenizer.decode([i]).encode('utf-8')
-    # remove the first byte (it's always '.')
-    # text = text[1:]
     fout.write(struct.pack("i", len(text)))
     fout.write(text)
     
@@ -140,41 +116,9 @@ for name in list_vars.keys():
         mapped = conv_map[".".join(nn[:-1])]
         name = ".".join([mapped] + nn[-1:])
 
-    
-
     if "query_key_value" in src:
-        qkv = list_vars[src]
-        # q, k, v = list_vars[src].split(list_vars[src].shape[0] // 3, dim=0)
         q, k, v = list_vars[src].reshape(config.n_head, 3, -1).unbind(1)
-        list_vars[src] = torch.cat([q, k, v], dim=0).reshape_as(qkv)
-        # old_name = name
-        # for data, n in zip([q, k, v], ["wq", "wk", "wv"]):
-        #     name = old_name
-        #     name = name.replace("query_key_value", n)
-        #     print(src, ' -> ', name)
-        #     data = data.squeeze().numpy()
-        #     data = data.astype(np.float32) # TODO: default type is fp32
-
-        #     n_dims = len(data.shape)
-        #     print(name, n_dims, data.shape)
-
-        #     # default type is fp32
-        #     ftype_cur = 0
-        #     if ftype == 1 and n_dims > 1:
-        #         print("  Converting to float16")
-        #         data = data.astype(np.float16)
-        #         ftype_cur = 1
-
-        #     # header
-        #     str = name.encode('utf-8')
-        #     fout.write(struct.pack("iii", n_dims, len(str), ftype_cur))
-        #     for i in range(n_dims):
-        #         fout.write(struct.pack("i", data.shape[n_dims - 1 - i]))
-        #     fout.write(str);
-
-        #     # data
-        #     data.tofile(fout)
-        # continue
+        list_vars[src] = torch.cat([q, k, v], dim=0).reshape_as(list_vars[src])
 
     print(src, ' -> ', name)
     data = list_vars[src].squeeze().numpy()

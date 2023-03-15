@@ -4,6 +4,8 @@ Inference of HuggingFace's [BLOOM-like](https://huggingface.co/docs/transformers
 
 The repo was built on top of the amazing [llama.cpp](https://github.com/ggerganov/llama.cpp) repo by [@ggerganov](https://github.com/ggerganov), to support [BLOOM](https://huggingface.co/docs/transformers/model_doc/bloom) models. It supports all models that can be loaded using `BloomForCausalLM.from_pretrained()`.
 
+![bloomz-7b1](assets/bloomz-demo.png)
+
 ## Demo
 
 ![bloomz-7b1](assets/bloomz-7b1.gif)

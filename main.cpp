@@ -11,6 +11,13 @@
 #include <string>
 #include <vector>
 
+#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#include <signal.h>
+#include <unistd.h>
+#elif defined (_WIN32)
+#include <signal.h>
+#endif
+
 struct bloom_hparams {
     int32_t n_vocab = 32000;
     int32_t n_ctx   = 512;   // this is provided as user input?
@@ -212,8 +219,8 @@ bool bloom_model_load(const std::string & fname, bloom_model & model, gpt_vocab 
     // create the ggml context
     {
         struct ggml_init_params params = {
-            .mem_size   = ctx_size,
-            .mem_buffer = NULL,
+            /*.mem_size   =*/ ctx_size,
+            /*.mem_buffer =*/ NULL,
         };
 
         model.ctx = ggml_init(params);
@@ -566,7 +573,8 @@ bool bloom_eval(
     };
 
     struct ggml_context * ctx0 = ggml_init(params);
-    struct ggml_cgraph gf = { .n_threads = n_threads };
+    ggml_cgraph gf = {};
+    gf.n_threads = n_threads;
 
     struct ggml_tensor * embd = ggml_new_tensor_1d(ctx0, GGML_TYPE_I32, N);
     memcpy(embd->data, embd_inp.data(), N*ggml_element_size(embd));
@@ -763,6 +771,7 @@ bool bloom_eval(
 }
 
 int main(int argc, char ** argv) {
+    ggml_time_init();
     const int64_t t_main_start_us = ggml_time_us();
 
     gpt_params params;

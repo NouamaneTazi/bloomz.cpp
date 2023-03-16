@@ -4,6 +4,16 @@
 #include <cstring>
 #include <fstream>
 #include <regex>
+#include <iostream>
+#include <iterator>
+#include <string>
+#include <math.h>
+
+ #if defined(_MSC_VER) || defined(__MINGW32__)
+ #include <malloc.h> // using malloc.h with MSC/MINGW
+ #elif !defined(__FreeBSD__) && !defined(__NetBSD__)
+ #include <alloca.h>
+ #endif
 
 bool gpt_params_parse(int argc, char ** argv, gpt_params & params) {
     for (int i = 1; i < argc; i++) {
@@ -487,7 +497,8 @@ size_t ggml_quantize_q4_0(float * src, void * dst, int n, int k, int qk, int64_t
 
     assert(k % qk == 0);
 
-    uint8_t pp[qk/2];
+    const size_t pp_size = qk / 2;
+    uint8_t *pp = static_cast<uint8_t*>(alloca(pp_size));
 
     char * pdst = (char *) dst;
 
@@ -526,7 +537,7 @@ size_t ggml_quantize_q4_0(float * src, void * dst, int n, int k, int qk, int64_t
                     pp[l/2] = vi0 | (vi1 << 4);
                 }
 
-                memcpy(pb, pp, sizeof(pp));
+                memcpy(pb, pp, pp_size);
                 pb += bs;
             }
         }
@@ -541,7 +552,8 @@ size_t ggml_quantize_q4_1(float * src, void * dst, int n, int k, int qk, int64_t
 
     assert(k % qk == 0);
 
-    uint8_t pp[qk/2];
+    const size_t pp_size = qk / 2;
+    uint8_t *pp = static_cast<uint8_t*>(alloca(pp_size));
 
     char * pdst = (char *) dst;
 
@@ -585,7 +597,7 @@ size_t ggml_quantize_q4_1(float * src, void * dst, int n, int k, int qk, int64_t
                     pp[l/2] = vi0 | (vi1 << 4);
                 }
 
-                memcpy(pb + i*qk/2, pp, sizeof(pp));
+                memcpy(pb + i*qk/2, pp, pp_size);
             }
         }
     }

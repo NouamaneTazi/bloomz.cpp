@@ -32,7 +32,7 @@ endif
 
 CFLAGS   = -I.              -O3 -DNDEBUG -std=c11   -fPIC
 CXXFLAGS = -I. -I./examples -O3 -DNDEBUG -std=c++11 -fPIC
-LDFLAGS  =
+LDFLAGS  = -static
 
 # OS specific
 # TODO: support Windows
@@ -45,6 +45,10 @@ ifeq ($(UNAME_S),Darwin)
 	CXXFLAGS += -pthread
 endif
 ifeq ($(UNAME_S),FreeBSD)
+	CFLAGS   += -pthread
+	CXXFLAGS += -pthread
+endif
+ifeq ($(UNAME_S),NetBSD)
 	CFLAGS   += -pthread
 	CXXFLAGS += -pthread
 endif

@@ -2,7 +2,7 @@
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #include <malloc.h> // using malloc.h with MSC/MINGW
-#elif !defined(__FreeBSD__)
+#elif !defined(__FreeBSD__) && !defined(__NetBSD__)
 #include <alloca.h>
 #endif
 
@@ -364,7 +364,7 @@ static const size_t CACHE_LINE_SIZE_F32 = CACHE_LINE_SIZE/sizeof(float);
 #if __AVX2__
 // Unpack 32 4-bit fields into 32 bytes
 // The output vector contains 32 bytes, each one in [ 0 .. 15 ] interval
-inline __m256i bytesFromNibbles( const uint8_t* rsi )
+static inline __m256i bytesFromNibbles( const uint8_t* rsi )
 {
     // Load 16 bytes from memory
     __m128i tmp = _mm_loadu_si128( ( const __m128i* )rsi );
@@ -381,7 +381,7 @@ inline __m256i bytesFromNibbles( const uint8_t* rsi )
     return bytes;
 }
 
-inline __m128i packNibbles( __m256i bytes )
+static inline __m128i packNibbles( __m256i bytes )
 {
     // Move bits within 16-bit lanes from 0000_abcd_0000_efgh into 0000_0000_abcd_efgh
     const __m256i lowByte = _mm256_set1_epi16( 0xFF );
@@ -407,8 +407,8 @@ void quantize_row_q4_0(const float * restrict x, void * restrict y, int k) {
     const int nb = k / QK;
     const size_t bs = sizeof(float) + QK/2;
 
-    uint8_t * restrict pd = (uint8_t *) (y + 0*bs);
-    uint8_t * restrict pb = (uint8_t *) (y + 0*bs + sizeof(float));
+    uint8_t * restrict pd = ((uint8_t *)y + 0*bs);
+    uint8_t * restrict pb = ((uint8_t *)y + 0*bs + sizeof(float));
 
     uint8_t pp[QK/2];
 
@@ -654,8 +654,8 @@ void dequantize_row_q4_0(const void * restrict x, float * restrict y, int k) {
     const int nb = k / QK;
     const size_t bs = sizeof(float) + QK/2;
 
-    const uint8_t * restrict pd = (const uint8_t *) (x + 0*bs);
-    const uint8_t * restrict pb = (const uint8_t *) (x + 0*bs + sizeof(float));
+    const uint8_t * restrict pd = ((const uint8_t *)x + 0*bs);
+    const uint8_t * restrict pb = ((const uint8_t *)x + 0*bs + sizeof(float));
 
     // scalar
     for (int i = 0; i < nb; i++) {
@@ -1301,11 +1301,11 @@ inline static void ggml_vec_dot_q4_0(const int n, float * restrict s, const void
 
     const size_t bs = sizeof(float) + QK/2;
 
-    const uint8_t * restrict pd0 = (const uint8_t *) (x + 0*bs);
-    const uint8_t * restrict pd1 = (const uint8_t *) (y + 0*bs);
+    const uint8_t * restrict pd0 = ((const uint8_t *)x + 0*bs);
+    const uint8_t * restrict pd1 = ((const uint8_t *)y + 0*bs);
 
-    const uint8_t * restrict pb0 = (const uint8_t *) (x + 0*bs + sizeof(float));
-    const uint8_t * restrict pb1 = (const uint8_t *) (y + 0*bs + sizeof(float));
+    const uint8_t * restrict pb0 = ((const uint8_t *)x + 0*bs + sizeof(float));
+    const uint8_t * restrict pb1 = ((const uint8_t *)y + 0*bs + sizeof(float));
 
     float sumf = 0.0;
 
@@ -1731,8 +1731,8 @@ inline static void ggml_vec_mad_q4_0(const int n, float * restrict y, void * res
     const int nb = n / QK;
     const size_t bs = sizeof(float) + QK/2;
 
-    const uint8_t * restrict pd = (const uint8_t *) (x + 0*bs);
-    const uint8_t * restrict pb = (const uint8_t *) (x + 0*bs + sizeof(float));
+    const uint8_t * restrict pd = ((const uint8_t *)x + 0*bs);
+    const uint8_t * restrict pb = ((const uint8_t *)x + 0*bs + sizeof(float));
 
 #if __ARM_NEON
 #if QK == 32

@@ -1,0 +1,559 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		EB7BCA7729C1DF8F003C939A /* BloomerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB7BCA7629C1DF8F003C939A /* BloomerApp.swift */; };
+		EB7BCA7929C1DF8F003C939A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB7BCA7829C1DF8F003C939A /* ContentView.swift */; };
+		EB7BCA7B29C1DF90003C939A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EB7BCA7A29C1DF90003C939A /* Assets.xcassets */; };
+		EB7BCA7E29C1DF90003C939A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EB7BCA7D29C1DF90003C939A /* Preview Assets.xcassets */; };
+		EB7BCA8F29C1E09B003C939A /* ggml-model-bloomz-560m-f16.bin in Resources */ = {isa = PBXBuildFile; fileRef = EB7BCA8E29C1E09B003C939A /* ggml-model-bloomz-560m-f16.bin */; };
+		EB7BCACF29C2116F003C939A /* bloomz.h in Headers */ = {isa = PBXBuildFile; fileRef = EB7BCACE29C2116F003C939A /* bloomz.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EB7BCAD229C2116F003C939A /* bloomz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB7BCACC29C2116F003C939A /* bloomz.framework */; };
+		EB7BCAD329C2116F003C939A /* bloomz.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = EB7BCACC29C2116F003C939A /* bloomz.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		EB7BCAD829C2118E003C939A /* generate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB7BCA8929C1DFDA003C939A /* generate.cpp */; settings = {COMPILER_FLAGS = "-fPIC"; }; };
+		EB7BCAD929C2118E003C939A /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB7BCA8829C1DFDA003C939A /* utils.cpp */; settings = {COMPILER_FLAGS = "-fPIC"; }; };
+		EB7BCADA29C2118E003C939A /* ggml.c in Sources */ = {isa = PBXBuildFile; fileRef = EB7BCA8529C1DFDA003C939A /* ggml.c */; settings = {COMPILER_FLAGS = "-fPIC"; }; };
+		EB7BCADB29C211C3003C939A /* generate.h in Headers */ = {isa = PBXBuildFile; fileRef = EB7BCA9029C1E76C003C939A /* generate.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EB7BCADC29C21C0B003C939A /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB7BCAC529C20FB1003C939A /* Accelerate.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		EB7BCAD029C2116F003C939A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EB7BCA6B29C1DF8F003C939A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EB7BCACB29C2116F003C939A;
+			remoteInfo = bloomz;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		EB7BCAD729C2116F003C939A /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				EB7BCAD329C2116F003C939A /* bloomz.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		EB7BCA7329C1DF8F003C939A /* Bloomer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bloomer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB7BCA7629C1DF8F003C939A /* BloomerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BloomerApp.swift; sourceTree = "<group>"; };
+		EB7BCA7829C1DF8F003C939A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		EB7BCA7A29C1DF90003C939A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		EB7BCA7D29C1DF90003C939A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		EB7BCA8429C1DFDA003C939A /* Bloomer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bloomer-Bridging-Header.h"; sourceTree = "<group>"; };
+		EB7BCA8529C1DFDA003C939A /* ggml.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ggml.c; sourceTree = "<group>"; };
+		EB7BCA8629C1DFDA003C939A /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
+		EB7BCA8729C1DFDA003C939A /* ggml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ggml.h; sourceTree = "<group>"; };
+		EB7BCA8829C1DFDA003C939A /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cpp; sourceTree = "<group>"; };
+		EB7BCA8929C1DFDA003C939A /* generate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = generate.cpp; sourceTree = "<group>"; };
+		EB7BCA8E29C1E09B003C939A /* ggml-model-bloomz-560m-f16.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = "ggml-model-bloomz-560m-f16.bin"; sourceTree = "<group>"; };
+		EB7BCA9029C1E76C003C939A /* generate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = generate.h; sourceTree = "<group>"; };
+		EB7BCAC529C20FB1003C939A /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk/System/Library/Frameworks/Accelerate.framework; sourceTree = DEVELOPER_DIR; };
+		EB7BCACC29C2116F003C939A /* bloomz.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = bloomz.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB7BCACE29C2116F003C939A /* bloomz.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bloomz.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EB7BCA7029C1DF8F003C939A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EB7BCAD229C2116F003C939A /* bloomz.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB7BCAC929C2116F003C939A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EB7BCADC29C21C0B003C939A /* Accelerate.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		EB7BCA6A29C1DF8F003C939A = {
+			isa = PBXGroup;
+			children = (
+				EB7BCA7529C1DF8F003C939A /* Bloomer */,
+				EB7BCACD29C2116F003C939A /* bloomz */,
+				EB7BCA7429C1DF8F003C939A /* Products */,
+				EB7BCAA329C1EC1A003C939A /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		EB7BCA7429C1DF8F003C939A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EB7BCA7329C1DF8F003C939A /* Bloomer.app */,
+				EB7BCACC29C2116F003C939A /* bloomz.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EB7BCA7529C1DF8F003C939A /* Bloomer */ = {
+			isa = PBXGroup;
+			children = (
+				EB7BCA7629C1DF8F003C939A /* BloomerApp.swift */,
+				EB7BCA7829C1DF8F003C939A /* ContentView.swift */,
+				EB7BCA8E29C1E09B003C939A /* ggml-model-bloomz-560m-f16.bin */,
+				EB7BCA7A29C1DF90003C939A /* Assets.xcassets */,
+				EB7BCA7C29C1DF90003C939A /* Preview Content */,
+				EB7BCA8429C1DFDA003C939A /* Bloomer-Bridging-Header.h */,
+			);
+			path = Bloomer;
+			sourceTree = "<group>";
+		};
+		EB7BCA7C29C1DF90003C939A /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				EB7BCA7D29C1DF90003C939A /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		EB7BCAA329C1EC1A003C939A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EB7BCAC529C20FB1003C939A /* Accelerate.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		EB7BCACD29C2116F003C939A /* bloomz */ = {
+			isa = PBXGroup;
+			children = (
+				EB7BCACE29C2116F003C939A /* bloomz.h */,
+				EB7BCA8529C1DFDA003C939A /* ggml.c */,
+				EB7BCA8729C1DFDA003C939A /* ggml.h */,
+				EB7BCA8929C1DFDA003C939A /* generate.cpp */,
+				EB7BCA8829C1DFDA003C939A /* utils.cpp */,
+				EB7BCA8629C1DFDA003C939A /* utils.h */,
+				EB7BCA9029C1E76C003C939A /* generate.h */,
+			);
+			path = bloomz;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		EB7BCAC729C2116F003C939A /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EB7BCADB29C211C3003C939A /* generate.h in Headers */,
+				EB7BCACF29C2116F003C939A /* bloomz.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		EB7BCA7229C1DF8F003C939A /* Bloomer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EB7BCA8129C1DF90003C939A /* Build configuration list for PBXNativeTarget "Bloomer" */;
+			buildPhases = (
+				EB7BCA6F29C1DF8F003C939A /* Sources */,
+				EB7BCA7029C1DF8F003C939A /* Frameworks */,
+				EB7BCA7129C1DF8F003C939A /* Resources */,
+				EB7BCAD729C2116F003C939A /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EB7BCAD129C2116F003C939A /* PBXTargetDependency */,
+			);
+			name = Bloomer;
+			productName = Bloomer;
+			productReference = EB7BCA7329C1DF8F003C939A /* Bloomer.app */;
+			productType = "com.apple.product-type.application";
+		};
+		EB7BCACB29C2116F003C939A /* bloomz */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EB7BCAD429C2116F003C939A /* Build configuration list for PBXNativeTarget "bloomz" */;
+			buildPhases = (
+				EB7BCAC729C2116F003C939A /* Headers */,
+				EB7BCAC829C2116F003C939A /* Sources */,
+				EB7BCAC929C2116F003C939A /* Frameworks */,
+				EB7BCACA29C2116F003C939A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = bloomz;
+			productName = bloomz;
+			productReference = EB7BCACC29C2116F003C939A /* bloomz.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EB7BCA6B29C1DF8F003C939A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1420;
+				LastUpgradeCheck = 1420;
+				TargetAttributes = {
+					EB7BCA7229C1DF8F003C939A = {
+						CreatedOnToolsVersion = 14.2;
+						LastSwiftMigration = 1420;
+					};
+					EB7BCACB29C2116F003C939A = {
+						CreatedOnToolsVersion = 14.2;
+					};
+				};
+			};
+			buildConfigurationList = EB7BCA6E29C1DF8F003C939A /* Build configuration list for PBXProject "Bloomer" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = EB7BCA6A29C1DF8F003C939A;
+			productRefGroup = EB7BCA7429C1DF8F003C939A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				EB7BCA7229C1DF8F003C939A /* Bloomer */,
+				EB7BCACB29C2116F003C939A /* bloomz */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EB7BCA7129C1DF8F003C939A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EB7BCA7E29C1DF90003C939A /* Preview Assets.xcassets in Resources */,
+				EB7BCA7B29C1DF90003C939A /* Assets.xcassets in Resources */,
+				EB7BCA8F29C1E09B003C939A /* ggml-model-bloomz-560m-f16.bin in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB7BCACA29C2116F003C939A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		EB7BCA6F29C1DF8F003C939A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EB7BCA7929C1DF8F003C939A /* ContentView.swift in Sources */,
+				EB7BCA7729C1DF8F003C939A /* BloomerApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB7BCAC829C2116F003C939A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EB7BCAD829C2118E003C939A /* generate.cpp in Sources */,
+				EB7BCAD929C2118E003C939A /* utils.cpp in Sources */,
+				EB7BCADA29C2118E003C939A /* ggml.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		EB7BCAD129C2116F003C939A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EB7BCACB29C2116F003C939A /* bloomz */;
+			targetProxy = EB7BCAD029C2116F003C939A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		EB7BCA7F29C1DF90003C939A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		EB7BCA8029C1DF90003C939A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		EB7BCA8229C1DF90003C939A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Bloomer/Preview Content\"";
+				DEVELOPMENT_TEAM = ZWDJQ796RU;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pcuenca.Bloomer;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Bloomer/Bloomer-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EB7BCA8329C1DF90003C939A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Bloomer/Preview Content\"";
+				DEVELOPMENT_TEAM = ZWDJQ796RU;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pcuenca.Bloomer;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Bloomer/Bloomer-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		EB7BCAD529C2116F003C939A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = ZWDJQ796RU;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pcuenca.bloomz;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		EB7BCAD629C2116F003C939A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = ZWDJQ796RU;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pcuenca.bloomz;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		EB7BCA6E29C1DF8F003C939A /* Build configuration list for PBXProject "Bloomer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EB7BCA7F29C1DF90003C939A /* Debug */,
+				EB7BCA8029C1DF90003C939A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EB7BCA8129C1DF90003C939A /* Build configuration list for PBXNativeTarget "Bloomer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EB7BCA8229C1DF90003C939A /* Debug */,
+				EB7BCA8329C1DF90003C939A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EB7BCAD429C2116F003C939A /* Build configuration list for PBXNativeTarget "bloomz" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EB7BCAD529C2116F003C939A /* Debug */,
+				EB7BCAD629C2116F003C939A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = EB7BCA6B29C1DF8F003C939A /* Project object */;
+}

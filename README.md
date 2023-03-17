@@ -132,3 +132,15 @@ options:
 | Model | Disk | Mem |
 | --- | --- | --- |
 | `bloomz-7b1-f16-q4_0` | 4.7 GB | 5.3 GB |
+
+## iOS App
+
+The repo includes a proof-of-concept iOS app in the `Bloomer` directory. You need to provide the converted model weights, placing a file called `ggml-model-bloomz-560m-f16.bin` inside that folder. This is what it looks like on an iPhone:
+
+![bloom-ios-screenshot](assets/bloom-ios.png)
+
+Known issues and limitations:
+
+- No feedback during generation, the full generated text is displayed at once upon termination.
+- The model is loaded from disk every time you submit a new string for completion.
+- Performance is much worse when testing on the simulator than when running the native binary. There could be some compiler options that might be impacting performance.

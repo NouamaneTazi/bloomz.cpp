@@ -35,7 +35,6 @@ CXXFLAGS = -I. -I./examples -O3 -DNDEBUG -std=c++11 -fPIC
 LDFLAGS  =
 
 # OS specific
-# TODO: support Windows
 ifeq ($(UNAME_S),Linux)
 	CFLAGS   += -pthread
 	CXXFLAGS += -pthread
@@ -48,9 +47,18 @@ ifeq ($(UNAME_S),FreeBSD)
 	CFLAGS   += -pthread
 	CXXFLAGS += -pthread
 endif
+ifeq ($(UNAME_S),NetBSD)
+	CFLAGS   += -pthread
+	CXXFLAGS += -pthread
+endif
 ifeq ($(UNAME_S),Haiku)
 	CFLAGS   += -pthread
 	CXXFLAGS += -pthread
+endif
+ifeq ($(findstring MINGW, $(UNAME_S)),MINGW)
+	CFLAGS   += -pthread
+	CXXFLAGS += -pthread
+	LDFLAGS  += -static
 endif
 
 # Architecture specific

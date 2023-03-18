@@ -24,7 +24,7 @@ Then, you can convert any BLOOM model from the Hub to the ggml format.
 
 ```bash
 # install required libraries
-python3 -m pip install torch numpy transformers
+python3 -m pip install torch numpy transformers accelerate
 
 # download and convert the 7B1 model to ggml FP16 format
 python3 convert-hf-to-ggml.py bigscience/bloomz-7b1 ./models 

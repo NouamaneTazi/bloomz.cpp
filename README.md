@@ -20,7 +20,16 @@ cd bloomz.cpp
 make
 ```
 
-Then, you can convert any BLOOM model from the Hub to the ggml format.
+### Convert weights
+
+Then, you must convert the model weights to the ggml format. Any BLOOM model can be converted.
+
+Some weights hosted on the Hub are already converted. You can find the list [here](https://huggingface.co/models?other=bloom&other=ggml).
+
+Otherwise, the quickest way to convert weights is to use this [converter tool](https://huggingface.co/spaces/Wauplin/bloomz.cpp-converter).
+It is a Space hosted on the Huggingface Hub that converts and quantizes weights for you and upload them to the repository of your choice.
+
+If you prefer, you can manually convert the weights on your machine:
 
 ```bash
 # install required libraries
@@ -36,6 +45,8 @@ Optionally, you can quantize the model to 4-bits.
 ```bash
 ./quantize ./models/ggml-model-bloomz-7b1-f16.bin ./models/ggml-model-bloomz-7b1-f16-q4_0.bin 2
 ```
+
+### Run inference
 
 Finally, you can run the inference.
 

@@ -78,7 +78,7 @@ ifeq ($(UNAME_M),$(filter $(UNAME_M),x86_64 i686))
 		ifneq (,$(findstring AVX2,$(AVX2_M)))
 			CFLAGS += -mavx2
 		endif
-	else ifeq ($(UNAME_S),Linux)
+	else ifneq ($(filter Linux MINGW%, $(UNAME_S)),)
 		AVX1_M := $(shell grep "avx " /proc/cpuinfo)
 		ifneq (,$(findstring avx,$(AVX1_M)))
 			CFLAGS += -mavx

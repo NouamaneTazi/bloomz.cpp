@@ -1,4 +1,12 @@
-# bloomz.cpp
+# clone of bloomz.cpp modified to quantize and run inference bloom-176B model
+
+You can quantize and run inference on bloom-176b
+
+- 4-bit quantized Bloom model file is ~112GB 
+- this code/model takes about 105GB of ram to run inference (though peak allocation is 111GB due to some shortcomings of the code that are not yet fixed)
+- performace-wise, this is not fast. at all. about 17 seconds per token (on 96 threads)... which is very close to full size Bloom on same CPU
+
+## bloomz.cpp
 
 Inference of HuggingFace's [BLOOM-like](https://huggingface.co/docs/transformers/model_doc/bloom) models in pure C/C++.
 

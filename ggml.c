@@ -2229,10 +2229,10 @@ void ggml_print_objects(const struct ggml_context * ctx) {
     GGML_PRINT("%s: --- end ---\n", __func__);
 }
 
-int ggml_nelements(const struct ggml_tensor * tensor) {
+size_t ggml_nelements(const struct ggml_tensor * tensor) {
     static_assert(GGML_MAX_DIMS == 4, "GGML_MAX_DIMS is not 4 - update this function");
 
-    return tensor->ne[0]*tensor->ne[1]*tensor->ne[2]*tensor->ne[3];
+    return (size_t) tensor->ne[0]*tensor->ne[1]*tensor->ne[2]*tensor->ne[3];
 }
 
 int ggml_nrows(const struct ggml_tensor * tensor) {

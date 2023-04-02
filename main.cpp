@@ -216,6 +216,9 @@ bool bloom_model_load(const std::string & fname, bloom_model & model, gpt_vocab 
         printf("%s: ggml ctx size = %6.2f MB\n", __func__, ctx_size/(1024.0*1024.0));
     }
 
+    // FIXME: increase the context size as it seems above calculations are off...
+    ctx_size += 5000000000; // + 5GB, seems to be the least amount of GB that works
+
     // create the ggml context
     {
         struct ggml_init_params params = {
@@ -355,7 +358,7 @@ bool bloom_model_load(const std::string & fname, bloom_model & model, gpt_vocab 
                     break;
                 }
 
-                int32_t nelements = 1;
+                int64_t nelements = 1;
                 int32_t ne[2] = { 1, 1 };
                 for (int i = 0; i < n_dims; ++i) {
                     fin.read(reinterpret_cast<char *>(&ne[i]), sizeof(ne[i]));
@@ -551,7 +554,8 @@ bool bloom_eval(
 
     const int d_key = n_embd/n_head;
 
-    static size_t buf_size = 512u*1024*1024;
+    //static size_t buf_size = 512u*1024*1024;
+    static size_t buf_size = 1024u*1024*1024;
     static void * buf = malloc(buf_size);
 
     if (mem_per_token > 0 && mem_per_token*N > buf_size) {

@@ -486,7 +486,7 @@ gpt_vocab::id bloom_sample_top_p(
 }
 
 
-size_t ggml_quantize_q4_0(float * src, void * dst, int n, int k, int qk, int64_t * hist) {
+size_t ggml_quantize_q4_0(float * src, void * dst, int64_t n, int k, int qk, int64_t * hist) {
     const int nb = k / qk;
     const size_t bs = (sizeof(float) + sizeof(uint8_t)*qk/2);
     const size_t row_size = nb*bs;
@@ -498,7 +498,7 @@ size_t ggml_quantize_q4_0(float * src, void * dst, int n, int k, int qk, int64_t
 
     char * pdst = (char *) dst;
 
-    for (int j = 0; j < n; j += k) {
+    for (int64_t j = 0; j < n; j += k) {
         uint8_t * pd = (uint8_t *) (pdst + (j/k)*row_size + 0*bs);
         uint8_t * pb = (uint8_t *) (pdst + (j/k)*row_size + 0*bs + sizeof(float));
 
@@ -542,7 +542,7 @@ size_t ggml_quantize_q4_0(float * src, void * dst, int n, int k, int qk, int64_t
     return (n/k)*row_size;
 }
 
-size_t ggml_quantize_q4_1(float * src, void * dst, int n, int k, int qk, int64_t * hist) {
+size_t ggml_quantize_q4_1(float * src, void * dst, int64_t n, int k, int qk, int64_t * hist) {
     const int nb = k / qk;
     const size_t row_size = nb*(2*sizeof(float) + sizeof(uint8_t)*qk/2);
 
@@ -553,7 +553,7 @@ size_t ggml_quantize_q4_1(float * src, void * dst, int n, int k, int qk, int64_t
 
     char * pdst = (char *) dst;
 
-    for (int j = 0; j < n; j += k) {
+    for (int64_t j = 0; j < n; j += k) {
         float   * pm = (float *)   (pdst + (j/k)*row_size);
         float   * pd = (float *)   (pm + nb);
         uint8_t * pb = (uint8_t *) (pd + nb);

@@ -10,7 +10,7 @@ import Dispatch
 import bloomz
 
 struct ContentView: View {
-    @State private var prompt: String = "This is not"
+    @State private var prompt: String = "Translate \"Hi, how are you?\" into Spanish:\n"
     @State private var generated: String = ""
     @State private var generating: Bool = false
     
@@ -34,11 +34,13 @@ struct ContentView: View {
     var body: some View {
         VStack {
             Image("bloom").resizable().aspectRatio(contentMode: .fit)
-            TextField("Prompt", text: $prompt).lineLimit(5)
-                .textFieldStyle(.roundedBorder)
-                .onSubmit {
-                        complete(from: prompt)
-                }
+            HStack {
+                TextField("Prompt", text: $prompt, axis: .vertical).lineLimit(2...5)
+                    .textFieldStyle(.roundedBorder)
+                Button("Complete") {
+                    complete(from: prompt)
+                }.buttonStyle(.borderedProminent)
+            }
             if generating {
                 ProgressView()
             }

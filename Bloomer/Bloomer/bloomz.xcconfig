@@ -1,0 +1,16 @@
+//
+//  bloomz.xcconfig
+//  Bloomer
+//
+//  Created by Pedro Cuenca on 11/4/23.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+OTHER_CFLAGS = -O3 -DNDEBUG -std=c11 -fPIC -pthread -mf16c -mfma -mavx -mavx2 -DGGML_USE_ACCELERATE
+OTHER_CPLUSPLUSFLAGS = -O3 -DNDEBUG -std=c++11 -fPIC -pthread
+
+GCC_OPTIMIZATION_LEVEL = 3
+ENABLE_TESTABILITY = NO
+DEBUG_INFORMATION_FORMAT = dwarf-with-dsym

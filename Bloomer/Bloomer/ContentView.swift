@@ -9,19 +9,33 @@ import SwiftUI
 import Dispatch
 import bloomz
 
-struct ContentView: View {
-    @State private var prompt: String = "Translate \"Hi, how are you?\" into Spanish:\n"
-    @State private var generated: String = ""
-    @State private var generating: Bool = false
+class ModelState: ObservableObject {
+    @Published var model: OpaquePointer? = nil
     
     var modelPath: String {
         Bundle.main.path(forResource: "ggml-model-bloomz-560m-f16", ofType: "bin")!
     }
-    
-    @State private var model: OpaquePointer? = nil
+
+    func load() {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let begin = Date()
+            let model = load_model(self.modelPath)
+            DispatchQueue.main.async { self.model = model }
+            print("Loaded \(String(describing: model)) in \(Date().timeIntervalSince(begin))")
+        }
+    }
+}
+
+struct ContentView: View {
+    @State private var prompt: String = "Translate \"Hi, how are you?\" into Spanish:\n"
+    @State private var generated: String = ""
+    @State private var generating: Bool = false
+        
+    @StateObject private var modelState = ModelState()
+    private var modelIsLoaded: Bool { modelState.model != nil }
         
     func complete(from text: String) {
-        guard let model = model else { return }
+        guard let model = modelState.model else { return }
         
         generating.toggle()
         generated = ""
@@ -43,7 +57,7 @@ struct ContentView: View {
                     .textFieldStyle(.roundedBorder)
                 Button("Complete") {
                     complete(from: prompt)
-                }.buttonStyle(.borderedProminent)
+                }.buttonStyle(.borderedProminent).disabled(!modelIsLoaded)
             }
             if generating {
                 ProgressView()
@@ -53,11 +67,7 @@ struct ContentView: View {
         }
         .padding()
         .onAppear {
-            DispatchQueue.global(qos: .userInitiated).async {
-                let begin = Date()
-                model = load_model(modelPath)
-                print("Loaded \(model) of type \(type(of: model)) in \(Date().timeIntervalSince(begin))")
-            }
+            modelState.load()
         }
     }
 }

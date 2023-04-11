@@ -789,7 +789,7 @@ extern const BloomModel * load_model(const char * model_path) {
     return model;
 }
 
-extern const char * generate(const BloomModel * bloom, const char * prompt, void (*token_callback)(const char * token)) {
+extern const float generate(const BloomModel * bloom, const char * prompt, void (*token_callback)(const char * token)) {
     const int64_t t_main_start_us = ggml_time_us();
 
     gpt_params params;
@@ -846,7 +846,7 @@ extern const char * generate(const BloomModel * bloom, const char * prompt, void
 
             if (!llama_eval(bloom->model, params.n_threads, n_past, embd, logits, mem_per_token)) { // update logits
                 printf("Failed to predict\n");
-                return "";
+                return -1.0;
             }
 
             t_predict_us += ggml_time_us() - t_start_us;
@@ -907,21 +907,15 @@ extern const char * generate(const BloomModel * bloom, const char * prompt, void
     }
 
     // report timing
-    {
-        const int64_t t_main_end_us = ggml_time_us();
+    const int64_t t_main_end_us = ggml_time_us();
+    const float t_ms_per_token = t_predict_us/1000.0f/n_past;
 
-        printf("\n\n");
-        printf("%s: mem per token = %8zu bytes\n", __func__, mem_per_token);
-        printf("%s:     load time = %8.2f ms\n", __func__, t_load_us/1000.0f);
-        printf("%s:   sample time = %8.2f ms\n", __func__, t_sample_us/1000.0f);
-        printf("%s:  predict time = %8.2f ms / %.2f ms per token\n", __func__, t_predict_us/1000.0f, t_predict_us/1000.0f/n_past);
-        printf("%s:    total time = %8.2f ms\n", __func__, (t_main_end_us - t_main_start_us)/1000.0f);
-    }
+    printf("\n\n");
+    printf("%s: mem per token = %8zu bytes\n", __func__, mem_per_token);
+    printf("%s:     load time = %8.2f ms\n", __func__, t_load_us/1000.0f);
+    printf("%s:   sample time = %8.2f ms\n", __func__, t_sample_us/1000.0f);
+    printf("%s:  predict time = %8.2f ms / %.2f ms per token\n", __func__, t_predict_us/1000.0f, t_ms_per_token);
+    printf("%s:    total time = %8.2f ms\n", __func__, (t_main_end_us - t_main_start_us)/1000.0f);
 
-    int len = result.size();
-    char *c = new char[len + 1];
-    std::copy(result.begin(), result.end(), c);
-    c[len] = '\0';
-
-    return c;
+    return t_ms_per_token;
 }

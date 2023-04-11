@@ -30,6 +30,7 @@ struct ContentView: View {
     @State private var prompt: String = "Translate \"Hi, how are you?\" into Spanish:\n"
     @State private var generated: String = ""
     @State private var generating: Bool = false
+    @State private var status: String = ""
         
     @StateObject private var modelState = ModelState()
     private var modelIsLoaded: Bool { modelState.model != nil }
@@ -45,6 +46,7 @@ struct ContentView: View {
         
         generating.toggle()
         generated = text
+        status = ""
         
         DispatchQueue.global(qos: .userInteractive).async {
             func token_callback(char_ptr: UnsafePointer<CChar>?) {
@@ -57,9 +59,9 @@ struct ContentView: View {
                 }
             }
             
-            guard let result = generate(model, text, token_callback) else { print("Error"); return }
+            let msPerToken = generate(model, text, token_callback)
             DispatchQueue.main.async {
-                generated = String(cString: result)
+                status = String(format: "%.2f ms/token", msPerToken)
                 generating = false
             }
         }
@@ -80,6 +82,9 @@ struct ContentView: View {
                 ProgressView().padding()
             }
             Spacer()
+            if status != "" {
+                Text(status).font(.system(size: 14)).padding().frame(maxWidth: .infinity).background(Color(white: 0.9))
+            }
         }
         .padding()
         .onAppear {

@@ -34,14 +34,30 @@ struct ContentView: View {
     @StateObject private var modelState = ModelState()
     private var modelIsLoaded: Bool { modelState.model != nil }
         
+    func listenToNotifications() {
+        NotificationCenter.default.addObserver(forName: NSNotification.Name("decoded.token.received"), object: nil, queue: nil) { decoded in
+            generated = generated.appending(decoded.object as! String)
+        }
+    }
+    
     func complete(from text: String) {
         guard let model = modelState.model else { return }
         
         generating.toggle()
-        generated = ""
+        generated = text
         
         DispatchQueue.global(qos: .userInteractive).async {
-            guard let result = generate(model, text) else { print("Error"); return }
+            func token_callback(char_ptr: UnsafePointer<CChar>?) {
+                guard let char_ptr = char_ptr else { return }
+                
+                // We can't pass a "function that captures context" as a C function pointer, so we resort to posting a notification
+                DispatchQueue.main.async {
+                    let str = String(cString: char_ptr)
+                    NotificationCenter.default.post(name: NSNotification.Name("decoded.token.received"), object: str)
+                }
+            }
+            
+            guard let result = generate(model, text, token_callback) else { print("Error"); return }
             DispatchQueue.main.async {
                 generated = String(cString: result)
                 generating = false
@@ -59,14 +75,15 @@ struct ContentView: View {
                     complete(from: prompt)
                 }.buttonStyle(.borderedProminent).disabled(!modelIsLoaded)
             }
+            Text(generated).frame(maxWidth: .infinity, alignment: .leading)//.multilineTextAlignment(.leading)
             if generating {
-                ProgressView()
+                ProgressView().padding()
             }
-            Text(generated)
             Spacer()
         }
         .padding()
         .onAppear {
+            listenToNotifications()
             modelState.load()
         }
     }

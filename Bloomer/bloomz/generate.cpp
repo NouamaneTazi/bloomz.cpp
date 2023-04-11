@@ -789,7 +789,7 @@ extern const BloomModel * load_model(const char * model_path) {
     return model;
 }
 
-extern const char * generate(const BloomModel * bloom, const char * prompt) {
+extern const char * generate(const BloomModel * bloom, const char * prompt, void (*token_callback)(const char * token)) {
     const int64_t t_main_start_us = ggml_time_us();
 
     gpt_params params;
@@ -868,9 +868,7 @@ extern const char * generate(const BloomModel * bloom, const char * prompt) {
                 const int64_t t_start_sample_us = ggml_time_us();
 
                 id = llama_sample_top_p(vocab, logits.data() + (logits.size() - n_vocab), last_n_tokens, repeat_penalty, top_p, temp, rng);
-
-                // // print
-                // printf("\ngenerated token: '%s' (%d)\n", vocab.id_to_token[id].c_str(), id);
+                token_callback(vocab.id_to_token[id].c_str());
 
                 last_n_tokens.erase(last_n_tokens.begin());
                 last_n_tokens.push_back(id);

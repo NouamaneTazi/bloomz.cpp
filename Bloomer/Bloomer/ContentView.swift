@@ -18,12 +18,16 @@ struct ContentView: View {
         Bundle.main.path(forResource: "ggml-model-bloomz-560m-f16", ofType: "bin")!
     }
     
+    @State private var model: OpaquePointer? = nil
+        
     func complete(from text: String) {
+        guard let model = model else { return }
+        
         generating.toggle()
         generated = ""
         
         DispatchQueue.global(qos: .userInteractive).async {
-            guard let result = generate(modelPath, text) else { print("Error"); return }
+            guard let result = generate(model, text) else { print("Error"); return }
             DispatchQueue.main.async {
                 generated = String(cString: result)
                 generating = false
@@ -49,6 +53,11 @@ struct ContentView: View {
         }
         .padding()
         .onAppear {
+            DispatchQueue.global(qos: .userInitiated).async {
+                let begin = Date()
+                model = load_model(modelPath)
+                print("Loaded \(model) of type \(type(of: model)) in \(Date().timeIntervalSince(begin))")
+            }
         }
     }
 }

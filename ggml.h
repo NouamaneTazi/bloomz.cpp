@@ -327,7 +327,7 @@ int64_t ggml_cycles_per_ms(void);
 void ggml_print_object (const struct ggml_object * obj);
 void ggml_print_objects(const struct ggml_context * ctx);
 
-int    ggml_nelements(const struct ggml_tensor * tensor);
+size_t    ggml_nelements(const struct ggml_tensor * tensor);
 size_t ggml_nbytes   (const struct ggml_tensor * tensor);
 
 int    ggml_blck_size (enum ggml_type type);

@@ -150,7 +150,7 @@ bool bloom_model_quantize(const std::string & fname_inp, const std::string & fna
                 break;
             }
 
-            int32_t nelements = 1;
+            int64_t nelements = 1;
             int32_t ne[2] = { 1, 1 };
             for (int i = 0; i < n_dims; ++i) {
                 finp.read (reinterpret_cast<char *>(&ne[i]), sizeof(ne[i]));

@@ -101,5 +101,5 @@ gpt_vocab::id bloom_sample_top_p(
 // Quantization
 //
 
-size_t ggml_quantize_q4_0(float * src, void * dst, int n, int k, int qk, int64_t * hist);
-size_t ggml_quantize_q4_1(float * src, void * dst, int n, int k, int qk, int64_t * hist);
+size_t ggml_quantize_q4_0(float * src, void * dst, int64_t n, int k, int qk, int64_t * hist);
+size_t ggml_quantize_q4_1(float * src, void * dst, int64_t n, int k, int qk, int64_t * hist);

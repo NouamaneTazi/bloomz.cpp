@@ -76,6 +76,11 @@ struct llama_model {
     std::map<std::string, struct ggml_tensor *> tensors;
 };
 
+struct _model_context {
+    struct llama_model model;
+    struct gpt_vocab vocab;
+};
+
 // load the model's weights from a file
 bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab & vocab, int n_ctx) {
     printf("%s: loading model from '%s' - please wait ...\n", __func__, fname.c_str());
@@ -772,11 +777,22 @@ bool llama_eval(
     return true;
 }
 
-extern const char * generate(const char * model_path, const char * prompt) {
+extern const BloomModel * load_model(const char * model_path) {
+    BloomModel * model = new BloomModel();
+
+    const int n_ctx = 2048;
+    if (!llama_model_load(model_path, model->model, model->vocab, n_ctx)) {
+        fprintf(stderr, "%s: failed to load model from '%s'\n", __func__, model_path);
+        return NULL;
+    }
+    
+    return model;
+}
+
+extern const float generate(const BloomModel * bloom, const char * prompt, void (*token_callback)(const char * token)) {
     const int64_t t_main_start_us = ggml_time_us();
 
     gpt_params params;
-    params.model = model_path;
     params.prompt = prompt;
 
     if (params.seed < 0) {
@@ -786,29 +802,7 @@ extern const char * generate(const char * model_path, const char * prompt) {
     printf("%s: seed = %d\n", __func__, params.seed);
 
     std::mt19937 rng(params.seed);
-//    if (params.prompt.empty()) {
-//        params.prompt = gpt_random_prompt(rng);
-//    }
-
-//    params.prompt = R"(// this function checks if the number n is prime
-//bool is_prime(int n) {)";
-
     int64_t t_load_us = 0;
-
-    gpt_vocab vocab;
-    llama_model model;
-
-    // load the model
-    {
-        const int64_t t_start_us = ggml_time_us();
-        const int n_ctx = 2048;
-        if (!llama_model_load(params.model, model, vocab, n_ctx)) {  // TODO: set context from user input ??
-            fprintf(stderr, "%s: failed to load model from '%s'\n", __func__, params.model.c_str());
-            return "";
-        }
-
-        t_load_us = ggml_time_us() - t_start_us;
-    }
 
     int n_past = 0;
 
@@ -816,11 +810,13 @@ extern const char * generate(const char * model_path, const char * prompt) {
     int64_t t_predict_us = 0;
 
     std::vector<float> logits;
+    
+    gpt_vocab vocab = bloom->vocab;
 
     // tokenize the prompt
     std::vector<gpt_vocab::id> embd_inp = ::llama_tokenize(vocab, params.prompt, false); //TODO: set bos to true?
 
-    params.n_predict = std::min(params.n_predict, model.hparams.n_ctx - (int) embd_inp.size());
+    params.n_predict = std::min(params.n_predict, bloom->model.hparams.n_ctx - (int) embd_inp.size());
 
     printf("\n");
     printf("%s: prompt: '%s'\n", __func__, params.prompt.c_str());
@@ -836,7 +832,7 @@ extern const char * generate(const char * model_path, const char * prompt) {
 
     // determine the required inference memory per token:
     size_t mem_per_token = 0;
-    llama_eval(model, params.n_threads, 0, { 0, 1, 2, 3 }, logits, mem_per_token);
+    llama_eval(bloom->model, params.n_threads, 0, { 0, 1, 2, 3 }, logits, mem_per_token);
 
     int last_n_size = params.repeat_last_n;
     std::vector<gpt_vocab::id> last_n_tokens(last_n_size);
@@ -848,9 +844,9 @@ extern const char * generate(const char * model_path, const char * prompt) {
         if (embd.size() > 0) {
             const int64_t t_start_us = ggml_time_us();
 
-            if (!llama_eval(model, params.n_threads, n_past, embd, logits, mem_per_token)) { // update logits
+            if (!llama_eval(bloom->model, params.n_threads, n_past, embd, logits, mem_per_token)) { // update logits
                 printf("Failed to predict\n");
-                return "";
+                return -1.0;
             }
 
             t_predict_us += ggml_time_us() - t_start_us;
@@ -865,17 +861,14 @@ extern const char * generate(const char * model_path, const char * prompt) {
             const float temp  = params.temp;
             const float repeat_penalty = params.repeat_penalty;
 
-            const int n_vocab = model.hparams.n_vocab;
-
+            const int n_vocab = bloom->model.hparams.n_vocab;
             gpt_vocab::id id = 0;
 
             {
                 const int64_t t_start_sample_us = ggml_time_us();
 
                 id = llama_sample_top_p(vocab, logits.data() + (logits.size() - n_vocab), last_n_tokens, repeat_penalty, top_p, temp, rng);
-
-                // // print
-                // printf("\ngenerated token: '%s' (%d)\n", vocab.id_to_token[id].c_str(), id);
+                token_callback(vocab.id_to_token[id].c_str());
 
                 last_n_tokens.erase(last_n_tokens.begin());
                 last_n_tokens.push_back(id);
@@ -914,23 +907,15 @@ extern const char * generate(const char * model_path, const char * prompt) {
     }
 
     // report timing
-    {
-        const int64_t t_main_end_us = ggml_time_us();
+    const int64_t t_main_end_us = ggml_time_us();
+    const float t_ms_per_token = t_predict_us/1000.0f/n_past;
 
-        printf("\n\n");
-        printf("%s: mem per token = %8zu bytes\n", __func__, mem_per_token);
-        printf("%s:     load time = %8.2f ms\n", __func__, t_load_us/1000.0f);
-        printf("%s:   sample time = %8.2f ms\n", __func__, t_sample_us/1000.0f);
-        printf("%s:  predict time = %8.2f ms / %.2f ms per token\n", __func__, t_predict_us/1000.0f, t_predict_us/1000.0f/n_past);
-        printf("%s:    total time = %8.2f ms\n", __func__, (t_main_end_us - t_main_start_us)/1000.0f);
-    }
+    printf("\n\n");
+    printf("%s: mem per token = %8zu bytes\n", __func__, mem_per_token);
+    printf("%s:     load time = %8.2f ms\n", __func__, t_load_us/1000.0f);
+    printf("%s:   sample time = %8.2f ms\n", __func__, t_sample_us/1000.0f);
+    printf("%s:  predict time = %8.2f ms / %.2f ms per token\n", __func__, t_predict_us/1000.0f, t_ms_per_token);
+    printf("%s:    total time = %8.2f ms\n", __func__, (t_main_end_us - t_main_start_us)/1000.0f);
 
-    ggml_free(model.ctx);
-
-    int len = result.size();
-    char *c = new char[len + 1];
-    std::copy(result.begin(), result.end(), c);
-    c[len] = '\0';
-
-    return c;
+    return t_ms_per_token;
 }

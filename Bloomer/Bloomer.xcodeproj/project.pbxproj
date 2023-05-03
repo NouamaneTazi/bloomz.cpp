@@ -15,9 +15,9 @@
 		EB7BCACF29C2116F003C939A /* bloomz.h in Headers */ = {isa = PBXBuildFile; fileRef = EB7BCACE29C2116F003C939A /* bloomz.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EB7BCAD229C2116F003C939A /* bloomz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB7BCACC29C2116F003C939A /* bloomz.framework */; };
 		EB7BCAD329C2116F003C939A /* bloomz.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = EB7BCACC29C2116F003C939A /* bloomz.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		EB7BCAD829C2118E003C939A /* generate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB7BCA8929C1DFDA003C939A /* generate.cpp */; settings = {COMPILER_FLAGS = "-fPIC"; }; };
-		EB7BCAD929C2118E003C939A /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB7BCA8829C1DFDA003C939A /* utils.cpp */; settings = {COMPILER_FLAGS = "-fPIC"; }; };
-		EB7BCADA29C2118E003C939A /* ggml.c in Sources */ = {isa = PBXBuildFile; fileRef = EB7BCA8529C1DFDA003C939A /* ggml.c */; settings = {COMPILER_FLAGS = "-fPIC"; }; };
+		EB7BCAD829C2118E003C939A /* generate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB7BCA8929C1DFDA003C939A /* generate.cpp */; };
+		EB7BCAD929C2118E003C939A /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB7BCA8829C1DFDA003C939A /* utils.cpp */; };
+		EB7BCADA29C2118E003C939A /* ggml.c in Sources */ = {isa = PBXBuildFile; fileRef = EB7BCA8529C1DFDA003C939A /* ggml.c */; };
 		EB7BCADB29C211C3003C939A /* generate.h in Headers */ = {isa = PBXBuildFile; fileRef = EB7BCA9029C1E76C003C939A /* generate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EB7BCADC29C21C0B003C939A /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB7BCAC529C20FB1003C939A /* Accelerate.framework */; };
 /* End PBXBuildFile section */
@@ -63,6 +63,7 @@
 		EB7BCAC529C20FB1003C939A /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk/System/Library/Frameworks/Accelerate.framework; sourceTree = DEVELOPER_DIR; };
 		EB7BCACC29C2116F003C939A /* bloomz.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = bloomz.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB7BCACE29C2116F003C939A /* bloomz.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bloomz.h; sourceTree = "<group>"; };
+		EBAAC1F129E592EE007432CE /* bloomz.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = bloomz.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +114,7 @@
 				EB7BCA7A29C1DF90003C939A /* Assets.xcassets */,
 				EB7BCA7C29C1DF90003C939A /* Preview Content */,
 				EB7BCA8429C1DFDA003C939A /* Bloomer-Bridging-Header.h */,
+				EBAAC1F129E592EE007432CE /* bloomz.xcconfig */,
 			);
 			path = Bloomer;
 			sourceTree = "<group>";
@@ -467,6 +469,7 @@
 		};
 		EB7BCAD529C2116F003C939A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EBAAC1F129E592EE007432CE /* bloomz.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -496,6 +499,7 @@
 		};
 		EB7BCAD629C2116F003C939A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EBAAC1F129E592EE007432CE /* bloomz.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

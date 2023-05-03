@@ -21,3 +21,5 @@ models/*
 
 arm_neon.h
 compile_commands.json
+
+Bloomer/Bloomer.xcodeproj/project.xcworkspace/xcuserdata/

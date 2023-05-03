@@ -12,7 +12,11 @@
 extern "C" {
 #endif
 
-extern const char * generate(const char * model_path, const char * prompt);
+// Opaque type defined in generate.cpp
+typedef struct _model_context BloomModel;
+
+extern const BloomModel * load_model(const char * model_path);
+extern const float generate(const BloomModel * bloom, const char * prompt, void (*token_callback)(const char * token));
 
 #ifdef __cplusplus
 }

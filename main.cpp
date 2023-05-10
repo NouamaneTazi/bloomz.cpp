@@ -418,21 +418,24 @@ bool bloom_model_load(const std::string & fname, bloom_model & model, gpt_vocab 
 
                 if (n_dims == 1) {
                     if (tensor->ne[0] != ne[0] || tensor->ne[1] != ne[1]) {
-                        fprintf(stderr, "%s: tensor '%s' has wrong shape in model file: got [%d, %d], expected [%d, %d]\n",
+                        fprintf(stderr,
+                                "%s: tensor '%s' has wrong shape in model file: got [%lld, %lld], expected [%d, %d]\n",
                                 __func__, name.data(), tensor->ne[0], tensor->ne[1], ne[0], ne[1]);
                         return false;
                     }
                 } else {
                     if (split_type == 0) {
                         if (tensor->ne[0]/n_parts != ne[0] || tensor->ne[1] != ne[1]) {
-                            fprintf(stderr, "%s: tensor '%s' has wrong shape in model file: got [%d, %d], expected [%d, %d]\n",
-                                    __func__, name.data(), tensor->ne[0]/n_parts, tensor->ne[1], ne[0], ne[1]);
+                            fprintf(stderr,
+                                    "%s: tensor '%s' has wrong shape in model file: got [%lld, %lld], expected [%d, %d]\n",
+                                    __func__, name.data(), tensor->ne[0] / n_parts, tensor->ne[1], ne[0], ne[1]);
                             return false;
                         }
                     } else {
                         if (tensor->ne[0] != ne[0] || tensor->ne[1]/n_parts != ne[1]) {
-                            fprintf(stderr, "%s: tensor '%s' has wrong shape in model file: got [%d, %d], expected [%d, %d]\n",
-                                    __func__, name.data(), tensor->ne[0], tensor->ne[1]/n_parts, ne[0], ne[1]);
+                            fprintf(stderr,
+                                    "%s: tensor '%s' has wrong shape in model file: got [%lld, %lld], expected [%d, %d]\n",
+                                    __func__, name.data(), tensor->ne[0], tensor->ne[1] / n_parts, ne[0], ne[1]);
                             return false;
                         }
                     }
@@ -665,13 +668,16 @@ bool bloom_eval(
             struct ggml_tensor * KQ_soft_max = ggml_soft_max(ctx0, KQ_masked);
 
             // V_trans = Vmem.view(n_embd/n_head, n_head, n_past + N).permute(1, 2, 0, 3).contiguous()
-            struct ggml_tensor * V_trans =
-                ggml_permute(ctx0,
-                        ggml_reshape_3d(ctx0,
-                            ggml_view_1d(ctx0, model.memory_v, (n_past + N)*n_embd, il*n_ctx*ggml_element_size(model.memory_v)*n_embd),
-                            n_embd/n_head, n_head, n_past + N),
-                        1, 2, 0, 3);
-
+            struct ggml_tensor *V_trans =
+                    ggml_cpy(ctx0,
+                             ggml_permute(ctx0,
+                                          ggml_reshape_3d(ctx0,
+                                                          ggml_view_1d(ctx0, model.memory_v, (n_past + N) * n_embd,
+                                                                       il * n_ctx * ggml_element_size(model.memory_v) *
+                                                                       n_embd),
+                                                          n_embd / n_head, n_head, n_past + N),
+                                          1, 2, 0, 3),
+                             ggml_new_tensor_3d(ctx0, model.memory_v->type, n_past + N, n_embd / n_head, n_head));
             // KQV = transpose(V) * KQ_soft_max
             struct ggml_tensor * KQV = ggml_mul_mat(ctx0, V_trans, KQ_soft_max);
 

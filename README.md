@@ -1,6 +1,6 @@
 # bloomz.cpp
 
-Inference of HuggingFace's [BLOOM-like](https://huggingface.co/docs/transformers/model_doc/bloom) models in pure C/C++.
+Inference of Hugging Face's [BLOOM-like](https://huggingface.co/docs/transformers/model_doc/bloom) models in pure C/C++.
 
 The repo was built on top of the amazing [llama.cpp](https://github.com/ggerganov/llama.cpp) repo by [@ggerganov](https://github.com/ggerganov), to support [BLOOM](https://huggingface.co/docs/transformers/model_doc/bloom) models. It supports all models that can be loaded using `BloomForCausalLM.from_pretrained()`.
 
